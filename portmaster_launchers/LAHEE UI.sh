@@ -19,8 +19,13 @@ get_controls
 GAMEDIR="/$directory/ports/LAHEE"
 cd $GAMEDIR
 
+# Set SDL variables for R36S/ArkOS
+export SDL_VIDEODRIVER=kmsdrm
+export SDL_VIDEO_GL_DRIVER=/usr/lib/libGL.so.1
+export SDL_VIDEO_EGL_DRIVER=/usr/lib/libEGL.so.1
+
 # Run the UI script using python3
-$ESUDO python3 lahee_ui.py
+$ESUDO python3 lahee_ui.py > lahee_ui_sh.log 2>&1
 
 $ESUDO systemctl restart oga_events &
 printf "\033c" >> /dev/tty1

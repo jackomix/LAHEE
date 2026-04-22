@@ -9,8 +9,13 @@ RA_PATHS = [
     "/opt/retroarch/bin/retroarch"
 ]
 
-TARGET_URL = b"http://127.0.0.1:8000"
-ORIGINAL_URL = b"https://retroachievements.org"
+TARGET_BASE = b"http://127.0.0.1:8000"
+VARIATIONS = [
+    b"https://retroachievements.org/",
+    b"http://retroachievements.org/",
+    b"https://retroachievements.org",
+    b"http://retroachievements.org"
+]
 
 def patch_retroarch():
     ra_path = None
@@ -35,18 +40,32 @@ def patch_retroarch():
     with open(ra_path, "rb") as f:
         data = f.read()
         
-    if ORIGINAL_URL not in data:
-        if TARGET_URL in data:
+    found_url = None
+    for url in VARIATIONS:
+        if url in data:
+            found_url = url
+            break
+            
+    if not found_url:
+        if TARGET_BASE in data:
             print("RetroArch is already patched!")
         else:
-            print("Could not find the RetroAchievements URL in the binary. Patching failed.")
+            print("Could not find any variation of RetroAchievements URL in the binary. Patching failed.")
+            print("Try checking if your RetroArch version uses a different URL or is already patched.")
         return
         
+    print(f"Found URL: {found_url.decode()}")
+    
+    # Determine the target URL based on whether the original had a trailing slash
+    target_url = TARGET_BASE
+    if found_url.endswith(b"/"):
+        target_url += b"/"
+        
     # We must pad the target URL to exactly match the length of the original URL to prevent breaking the binary
-    padded_target = TARGET_URL + b'\x00' * (len(ORIGINAL_URL) - len(TARGET_URL))
+    padded_target = target_url + b'\x00' * (len(found_url) - len(target_url))
     
     # Replace all instances
-    patched_data = data.replace(ORIGINAL_URL, padded_target)
+    patched_data = data.replace(found_url, padded_target)
     
     with open(ra_path, "wb") as f:
         f.write(patched_data)
