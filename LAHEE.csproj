@@ -109,7 +109,7 @@
 
     <Target Name="SetHash" AfterTargets="InitializeSourceControlInformation">
 
-		<Exec Command="git.exe describe --always --dirty --exclude='*' --abbrev=8" ConsoleToMSBuild="True" IgnoreExitCode="False">
+		<Exec Command="git describe --always --dirty --exclude='*' --abbrev=8" ConsoleToMSBuild="True" IgnoreExitCode="False">
 			<Output PropertyName="Revision" TaskParameter="ConsoleOutput" />
 		</Exec>
 
