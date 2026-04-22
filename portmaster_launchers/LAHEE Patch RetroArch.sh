@@ -13,21 +13,12 @@ else
 fi
 
 source $controlfolder/control.txt
-source $controlfolder/device_info.txt
 
-# Set directory
-PORTDIR="/roms/ports/LAHEE"
+GAMEDIR="/$directory/ports/LAHEE"
+cd $GAMEDIR
 
-cd $PORTDIR
-
-# Execute the application.
-# LAHEE is a console app, you might want to run it via gptokeyb so you can kill it with a button combo
-$ESUDO chmod +x "$PORTDIR/LAHEE"
-
-$ESUDO kill -9 $(pidof gptokeyb)
-$controlfolder/gptokeyb "LAHEE" -c "./lahee.gptk" &
-./LAHEE 2>&1 | tee /dev/tty0
-
-$ESUDO kill -9 $(pidof gptokeyb)
-$ESUDO systemctl restart oga_events &
+printf "\033c" >> /dev/tty1
+echo "Patching RetroArch..." >> /dev/tty1
+$ESUDO python3 lahee_patch_ra.py >> /dev/tty1 2>&1
+sleep 3
 printf "\033c" >> /dev/tty1

@@ -24,25 +24,28 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
       
-    - name: Publish linux-arm64
+    - name: Package for PortMaster
       run: |
-        dotnet publish LAHEE.csproj -c Release -r linux-arm64 --self-contained true -o ./publish_output
+        mkdir -p ./publish_output/LAHEE/Web
+        mkdir -p ./publish_output/LAHEE/Data
         
-    - name: Copy Web Files & PortMaster Scripts
-      run: |
-        cp -r Web ./publish_output/Web/
-        cp -r Data ./publish_output/Data/
-        cp LAHEE.sh ./publish_output/
-        cp lahee.gptk ./publish_output/
-        cp lahee_start.sh ./publish_output/
-        cp lahee_patch_ra.py ./publish_output/
-        cp lahee_unpatch_ra.py ./publish_output/
-        cp lahee_ui.py ./publish_output/
-        cp lahee_ui.sh ./publish_output/
+        dotnet publish LAHEE.csproj -c Release -r linux-arm64 --self-contained true -o ./publish_output/LAHEE
+        
+        cp -r Web/* ./publish_output/LAHEE/Web/
+        cp -r Data/* ./publish_output/LAHEE/Data/
+        cp lahee.gptk ./publish_output/LAHEE/
+        cp lahee_patch_ra.py ./publish_output/LAHEE/
+        cp lahee_unpatch_ra.py ./publish_output/LAHEE/
+        cp lahee_ui.py ./publish_output/LAHEE/
+        
+        cp "portmaster_launchers/LAHEE Server.sh" ./publish_output/
+        cp "portmaster_launchers/LAHEE UI.sh" ./publish_output/
+        cp "portmaster_launchers/LAHEE Patch RetroArch.sh" ./publish_output/
+        cp "portmaster_launchers/LAHEE Unpatch RetroArch.sh" ./publish_output/
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: LAHEE-linux-arm64
-        path: ./publish_output
+        path: ./publish_output/*
         if-no-files-found: error

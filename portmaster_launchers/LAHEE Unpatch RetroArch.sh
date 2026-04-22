@@ -14,11 +14,11 @@ fi
 
 source $controlfolder/control.txt
 
-PORTDIR="/roms/ports/LAHEE"
-cd $PORTDIR
+GAMEDIR="/$directory/ports/LAHEE"
+cd $GAMEDIR
 
-# Run the UI script using python3
-$ESUDO python3 lahee_ui.py
-
-$ESUDO systemctl restart oga_events &
+printf "\033c" >> /dev/tty1
+echo "Unpatching RetroArch..." >> /dev/tty1
+$ESUDO python3 lahee_unpatch_ra.py >> /dev/tty1 2>&1
+sleep 3
 printf "\033c" >> /dev/tty1
