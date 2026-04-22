@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-import pygame
 import sys
+import os
 import json
 import urllib.request
 import urllib.parse
-import os
 
 # Set up logging
 LOG_FILE = "lahee_ui.log"
@@ -12,6 +11,18 @@ def log(msg):
     with open(LOG_FILE, "a") as f:
         f.write(f"{msg}\n")
     print(msg)
+
+log(f"Python version: {sys.version}")
+log(f"Python executable: {sys.executable}")
+log(f"Python path: {sys.path}")
+log(f"Current directory: {os.getcwd()}")
+
+try:
+    import pygame
+    log(f"Pygame version: {pygame.version.ver}")
+except Exception as e:
+    log(f"CRITICAL: Failed to import pygame: {e}")
+    # We'll catch this again in main() for the full traceback
 
 # R36S Screen Resolution
 WIDTH = 640
@@ -29,6 +40,7 @@ def fetch_lahee_info():
 
 def main():
     try:
+        import pygame
         pygame.init()
         if not pygame.display.get_init():
             log("Pygame display failed to initialize")
@@ -78,7 +90,6 @@ def main():
                     elif event.key == pygame.K_DOWN:
                         selected_game_idx = min(len(games) - 1, selected_game_idx + 1)
                     elif event.key == pygame.K_RETURN:
-                        # In a full UI, pressing Enter would show achievements for the game
                         pass
 
             if state == "ERROR":
@@ -101,15 +112,13 @@ def main():
                         text = font.render(f"{game.get('Title', 'Unknown')} (ID: {game.get('ID', '0')})", True, color)
                         screen.blit(text, (20, 80 + i * 30))
                         
-                    # Display basic user stats for selected game
                     if len(users) > 0 and len(games) > 0:
-                        current_user = users[0] # Just pick first user
+                        current_user = users[0]
                         game_id = str(games[selected_game_idx].get("ID", ""))
                         ug_data = current_user.get("GameData", {}).get(game_id, {})
                         ach_dict = ug_data.get("Achievements", {})
                         
                         unlocked_count = len([a for a in ach_dict.values() if a.get("Status", 0) > 0])
-                        # AchievementSets might be empty or missing
                         sets = games[selected_game_idx].get("AchievementSets", [])
                         total_count = len(sets[0].get("Achievements", [])) if sets else 0
                         
