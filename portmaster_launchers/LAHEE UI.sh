@@ -19,46 +19,17 @@ get_controls
 GAMEDIR="/$directory/ports/LAHEE"
 cd $GAMEDIR
 
-# Set SDL variables for R36S/ArkOS
-export SDL_VIDEODRIVER=kmsdrm
-export SDL_VIDEO_GL_DRIVER=/usr/lib/libGL.so.1
-export SDL_VIDEO_EGL_DRIVER=/usr/lib/libEGL.so.1
-
-# Try to find a python environment with pygame
-# Default to system python
-PYTHON_EXE="python3"
-
-# List of potential PortMaster runtimes to check
-# Checking both /roms/ports and /opt paths
-RUNTIMES=(
-    "/roms/ports/PortMaster/runtimes/python3.11/bin/python3"
-    "/roms/ports/PortMaster/runtimes/python3.10/bin/python3"
-    "/roms/ports/PortMaster/runtimes/python3.9/bin/python3"
-    "/opt/system/Tools/PortMaster/runtimes/python3.11/bin/python3"
-    "/opt/tools/PortMaster/runtimes/python3.11/bin/python3"
-    "$controlfolder/runtimes/python3.11/bin/python3"
-    "$controlfolder/runtimes/python3.10/bin/python3"
-    "$controlfolder/runtimes/python3.9/bin/python3"
-)
-
-for runtime in "${RUNTIMES[@]}"; do
-  if [ -f "$runtime" ]; then
-    echo "Checking runtime: $runtime" >> lahee_ui_sh.log
-    if "$runtime" -c "import pygame" > /dev/null 2>&1; then
-      PYTHON_EXE="$runtime"
-      echo "Found pygame in: $PYTHON_EXE" >> lahee_ui_sh.log
-      export LD_LIBRARY_PATH="$(dirname "$runtime")/../lib:$LD_LIBRARY_PATH"
-      break
-    fi
-  fi
-done
-
-if [ "$PYTHON_EXE" == "python3" ]; then
-    echo "Warning: Using system python3, pygame might be missing." >> lahee_ui_sh.log
+# Use LOVE engine for UI
+LOVE_EXE="love"
+if [ -f "/usr/bin/love" ]; then
+    LOVE_EXE="/usr/bin/love"
+elif [ -f "$controlfolder/runtimes/love/love" ]; then
+    LOVE_EXE="$controlfolder/runtimes/love/love"
 fi
 
-# Run the UI script
-$ESUDO "$PYTHON_EXE" lahee_ui.py >> lahee_ui_sh.log 2>&1
+# Launch with gptokeyb for controller mapping
+$GPTOKEYB "$LOVE_EXE" -c "lahee.gptk" &
+$ESUDO "$LOVE_EXE" . > lahee_ui.log 2>&1
 
 $ESUDO systemctl restart oga_events &
 printf "\033c" >> /dev/tty1
