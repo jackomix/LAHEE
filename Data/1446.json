@@ -17,15 +17,27 @@
   "RichPresencePatch": "",
   "Achievements": [
     {
-      "ID": 11111,
-      "MemAddr": "0x0000=1",
-      "Title": "Test Achievement",
-      "Description": "This is a test achievement for SMB1",
-      "Points": 5,
-      "Author": "LAHEE",
+      "ID": 1450,
+      "MemAddr": "d0xH0756=0_0xH0756=1_0xH0770=0",
+      "Title": "Shroooooms...",
+      "Description": "Get a Magic Mushroom.",
+      "Points": 1,
+      "Author": "RetroAchievements",
       "Modified": "1234567890",
       "Created": "1234567890",
-      "BadgeName": "00000",
+      "BadgeName": "026368",
+      "Flags": 3
+    },
+    {
+      "ID": 1451,
+      "MemAddr": "0xH075f=0_0xH075c=0_d0xH0770=0_0xH0770=2",
+      "Title": "Welcome to the Mushroom Kingdom",
+      "Description": "Complete World 1-1.",
+      "Points": 5,
+      "Author": "RetroAchievements",
+      "Modified": "1234567890",
+      "Created": "1234567890",
+      "BadgeName": "026369",
       "Flags": 3
     }
   ],
