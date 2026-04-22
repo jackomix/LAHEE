@@ -26,12 +26,12 @@ jobs:
         dotnet publish .\LAHEE.csproj --configuration Release /p:PublishProfile=.\LAHEE.pubxml
     - name: Copy Web Files
       run: |
-        xcopy Web\ bin\Release\net8.0\publish\Web\ /E
+        xcopy Web\ bin\Release\net10.0\publish\Web\ /E
     - name: Upload
       uses: actions/upload-artifact@v4.3.3
       with:
         name: LAHEE
-        path: bin\Release\net8.0\publish
+        path: bin\Release\net10.0\publish
         if-no-files-found: error
         overwrite: true
               
