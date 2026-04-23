@@ -2,18 +2,17 @@
 import os
 import shutil
 
-# Common paths for RetroArch on dArkOS/ArkOS
-RA_PATHS = [
-    "retroarch", # Check current directory (for testing/local)
-    "retroarch32",
-    "/usr/bin/retroarch",
-    "/usr/local/bin/retroarch",
-    "/opt/retroarch/bin/retroarch",
-    "/opt/retroarch/bin/retroarch32"
+# Targeted paths but also searching recursively in common locations
+SEARCH_DIRS = [
+    "/usr/bin",
+    "/usr/local/bin",
+    "/opt/retroarch",
+    "/roms/tools",
+    "/roms/bin",
+    "."
 ]
 
 TARGET_BASE = b"http://127.0.0.1:8000"
-# Order matters: check longer patterns first to avoid partial matches
 VARIATIONS = [
     b"https://retroachievements.org/",
     b"http://retroachievements.org/",
@@ -21,36 +20,57 @@ VARIATIONS = [
     b"http://retroachievements.org"
 ]
 
+def find_targets():
+    found = set()
+    # Hardcoded known paths
+    known = [
+        "/usr/bin/retroarch",
+        "/usr/bin/retroarch32",
+        "/opt/retroarch/bin/retroarch",
+        "/opt/retroarch/bin/retroarch32",
+        "retroarch",
+        "retroarch32"
+    ]
+    for k in known:
+        if os.path.exists(k):
+            found.add(k)
+            
+    # Search recursively
+    for d in SEARCH_DIRS:
+        if not os.path.exists(d):
+            continue
+        print(f"Searching for retroarch binaries in {d}...")
+        for root, dirs, files in os.walk(d):
+            # Prune directories to speed up search
+            if "games" in dirs: dirs.remove("games")
+            if "saves" in dirs: dirs.remove("saves")
+            
+            for file in files:
+                if file.startswith("retroarch") and not file.endswith((".cfg", ".txt", ".sh", ".bak", ".lpl")):
+                    found.add(os.path.join(root, file))
+    return list(found)
+
 def patch_file(path):
-    if not os.path.exists(path):
+    print(f"Checking {path}...")
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except Exception as e:
+        print(f"  Error reading file: {e}")
         return False
         
-    print(f"Found retroarch at {path}")
-    bak_path = path + ".bak"
-    
-    if not os.path.exists(bak_path):
-        print(f"Creating backup at {bak_path}")
-        shutil.copy2(path, bak_path)
-    else:
-        print("Backup already exists. Using existing backup.")
-        
-    with open(path, "rb") as f:
-        data = f.read()
-        
     any_replaced = False
+    new_data = data
+    
     for url in VARIATIONS:
-        if url in data:
-            count = data.count(url)
-            print(f"Found {count} instances of URL: {url.decode()}")
+        if url in new_data:
+            count = new_data.count(url)
+            print(f"  Found {count} instances of URL: {url.decode()}")
             
-            # Determine target with trailing slash if needed
             target_url = TARGET_BASE
             if url.endswith(b"/"):
                 target_url += b"/"
                 
-            # Pad with slashes instead of nulls. 
-            # This is safer as multiple slashes are ignored by web servers
-            # and it doesn't terminate the string if it's part of a longer path.
             padding_len = len(url) - len(target_url)
             if padding_len > 0:
                 if target_url.endswith(b"/"):
@@ -60,33 +80,36 @@ def patch_file(path):
             else:
                 padded_target = target_url[:len(url)]
                 
-            print(f"Replacing with: {padded_target.decode()}")
-            data = data.replace(url, padded_target)
+            print(f"  Replacing with: {padded_target.decode()}")
+            new_data = new_data.replace(url, padded_target)
             any_replaced = True
             
-    if not any_replaced:
-        if TARGET_BASE in data:
-            print("File is already patched!")
-        else:
-            print("Could not find any variation of RetroAchievements URL in the binary.")
-        return False
-        
-    with open(path, "wb") as f:
-        f.write(data)
-        
-    # Ensure it's executable
-    os.chmod(path, 0o755)
-    print(f"Successfully patched {path}!")
-    return True
-
-def patch_retroarch():
-    found_any = False
-    for path in RA_PATHS:
-        if patch_file(path):
-            found_any = True
+    if any_replaced:
+        bak_path = path + ".bak"
+        if not os.path.exists(bak_path):
+            print(f"  Creating backup at {bak_path}")
+            shutil.copy2(path, bak_path)
             
-    if not found_any:
-        print("No RetroArch binaries were patched. Check if they exist or are already patched.")
+        with open(path, "wb") as f:
+            f.write(new_data)
+        os.chmod(path, 0o755)
+        print(f"  Successfully patched {path}!")
+        return True
+    
+    if TARGET_BASE in data:
+        print("  Already patched.")
+    else:
+        print("  No RetroAchievements patterns found.")
+    return False
 
 if __name__ == "__main__":
-    patch_retroarch()
+    print("LAHEE RetroArch Nuclear Patcher starting...")
+    targets = find_targets()
+    print(f"Found {len(targets)} potential binaries to check.")
+    
+    patched_count = 0
+    for t in targets:
+        if patch_file(t):
+            patched_count += 1
+            
+    print(f"\nNuclear Patch Complete. Total files patched: {patched_count}")
