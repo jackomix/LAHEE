@@ -12,17 +12,13 @@ SEARCH_DIRS = [
     "."
 ]
 
-# The standard address
-TARGET_BASE = b"http://127.0.0.1:8000"
+TARGET_HOST = b"http://127.0.0.1:8000"
 
-VARIATIONS = [
-    b"https://retroachievements.org/dorequest.php",
-    b"http://retroachievements.org/dorequest.php",
-    b"https://retroachievements.org/",
-    b"http://retroachievements.org/",
-    b"https://retroachievements.org",
-    b"http://retroachievements.org",
-    b"media.retroachievements.org"
+# We only replace the domain parts to ensure /dorequest.php and other paths are preserved!
+PATTERNS = [
+    (b"https://retroachievements.org", b"http://127.0.0.1:8000"),
+    (b"http://retroachievements.org",  b"http://127.0.0.1:8000"),
+    (b"media.retroachievements.org",   b"127.0.0.1:8000/badge")
 ]
 
 def find_targets():
@@ -64,26 +60,22 @@ def patch_file(path):
     any_replaced = False
     new_data = data
     
-    for url in VARIATIONS:
-        if url in new_data:
-            count = new_data.count(url)
-            print(f"  Found {count} instances of URL: {url.decode()}")
+    for old, new in PATTERNS:
+        if old in new_data:
+            count = new_data.count(old)
+            print(f"  Found {count} instances of: {old.decode()}")
             
-            # Use /./ as padding (requested /./ padding)
-            padding_len = len(url) - len(TARGET_BASE)
-            if padding_len > 0:
-                # Add a slash then ././
-                pad = b"/"
-                remaining = padding_len - 1
-                pad += (b"./" * (remaining // 2))
-                if remaining % 2 == 1:
-                    pad += b"."
-                padded_target = TARGET_BASE + pad
+            # Use trailing slashes for padding. 
+            # This preserves the rest of the string (like /dorequest.php)
+            # because 'http://127.0.0.1:8000////dorequest.php' is a valid URL.
+            padding_len = len(old) - len(new)
+            if padding_len >= 0:
+                padded_new = new + (b"/" * padding_len)
             else:
-                padded_target = TARGET_BASE[:len(url)]
+                padded_new = new[:len(old)]
                 
-            print(f"  Replacing with: {padded_target.decode()}")
-            new_data = new_data.replace(url, padded_target)
+            print(f"  Replacing with: {padded_new.decode()}")
+            new_data = new_data.replace(old, padded_new)
             any_replaced = True
             
     if any_replaced:
@@ -98,12 +90,10 @@ def patch_file(path):
         print(f"  Successfully patched {path}!")
         return True
     
-    if TARGET_BASE in data:
-        print("  Already patched.")
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v6 - /./ Padding Mode) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v7 - Path Preservation Mode) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
