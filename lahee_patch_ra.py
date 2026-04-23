@@ -69,50 +69,7 @@ def patch_file(path):
             count = new_data.count(url)
             print(f"  Found {count} instances of URL: {url.decode()}")
             
-            # Simple padding with /
-            padding_len = len(url) - len(TARGET_BASE)
-            if padding_len >= 0:
-                padded_target = TARGET_BASE + (b"/" * padding_len)
-            else:
-                padded_target = TARGET_BASE[:len(url)]
-                
-            print(f"  Replacing with: {padded_target.decode()}")
-            new_data = new_data.replace(url, padded_target)
-            any_replaced = True
-            
-    if any_replaced:
-        bak_path = path + ".bak"
-        if not os.path.exists(bak_path):
-            print(f"  Creating backup at {bak_path}")
-            shutil.copy2(bak_path, path) # ERROR in logic here, fixing below
-            
-        with open(path, "wb") as f:
-            f.write(new_data)
-        os.chmod(path, 0o755)
-        print(f"  Successfully patched {path}!")
-        return True
-    
-    return False
-
-# Self-Correction: Fix the backup logic error in the write_file above
-def patch_file_fixed(path):
-    print(f"Checking {path}...")
-    try:
-        with open(path, "rb") as f:
-            data = f.read()
-    except Exception as e:
-        print(f"  Error reading file: {e}")
-        return False
-        
-    any_replaced = False
-    new_data = data
-    
-    for url in VARIATIONS:
-        if url in new_data:
-            count = new_data.count(url)
-            print(f"  Found {count} instances of URL: {url.decode()}")
-            
-            # Use /./ as padding (it's very safe)
+            # Use /./ as padding (it's very safe and standard)
             padding_len = len(url) - len(TARGET_BASE)
             if padding_len > 0:
                 # Add a slash then ././
@@ -140,17 +97,19 @@ def patch_file_fixed(path):
         os.chmod(path, 0o755)
         print(f"  Successfully patched {path}!")
         return True
+    
+    if TARGET_BASE in data:
+        print("  Already patched (or uses local address).")
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v5 - Loopback Fix) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v5 - Loopback & Octal Fix) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
     patched_count = 0
     for t in targets:
-        # We'll use the logic from patch_file_fixed
-        if patch_file_fixed(t):
+        if patch_file(t):
             patched_count += 1
             
     print(f"\nNuclear Patch Complete. Total files patched: {patched_count}")
