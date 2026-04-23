@@ -33,9 +33,9 @@ static class Network {
         server = new WebserverLite(new WebserverSettings("0.0.0.0", localPort), Routes.DefaultNotFoundRoute);
 
         server.Events.Logger += WatsonLogger;
-        server.Settings.Debug.Responses = Program.Config.GetBool("Watson", "DebugResponses");
-        server.Settings.Debug.Requests = Program.Config.GetBool("Watson", "DebugRequests");
-        server.Settings.Debug.Routing = Program.Config.GetBool("Watson", "DebugRouting");
+        server.Settings.Debug.Responses = true;
+        server.Settings.Debug.Requests = true;
+        server.Settings.Debug.Routing = true;
 
         server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR, Routes.RedirectWeb, Routes.DefaultErrorRoute);
         server.Routes.PreAuthentication.Static.Add(HttpMethod.OPTIONS, BASE_DIR + "dorequest.php", Routes.DisableCors, Routes.DefaultErrorRoute);
