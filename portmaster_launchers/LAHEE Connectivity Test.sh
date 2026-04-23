@@ -15,15 +15,15 @@ fi
 
 source $controlfolder/control.txt
 
+# The program is in the LAHEE subdirectory
 GAMEDIR="/$directory/ports/LAHEE"
-cd $GAMEDIR
+cd "$GAMEDIR"
 
-# Use the terminal for output so the user can read it on the handheld
+# Use the terminal for output
 printf "\033c" >> /dev/tty1
 echo "--- LAHEE CONNECTIVITY TEST ---" >> /dev/tty1
 echo "Running diagnostics..." >> /dev/tty1
 
-# Run the python script and redirect output to the terminal
 $ESUDO python3 lahee_diag.py >> /dev/tty1 2>&1
 
 echo "" >> /dev/tty1
