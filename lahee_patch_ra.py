@@ -12,22 +12,13 @@ SEARCH_DIRS = [
     "."
 ]
 
-# Use localhost for better compatibility, and pad with /././
-TARGET_BASE = b"http://localhost:8000"
-
-VARIATIONS = [
-    b"https://retroachievements.org/dorequest.php",
-    b"http://retroachievements.org/dorequest.php",
-    b"https://retroachievements.org/",
-    b"http://retroachievements.org/",
-    b"https://retroachievements.org",
-    b"http://retroachievements.org",
-    b"media.retroachievements.org"
-]
+# The "Golden" Padded IP and Port
+# http://127.000.000.001:08000 is 28 characters
+# https://retroachievements.org is 29 characters
+# This allows for surgically perfect length matching
 
 def find_targets():
     found = set()
-    # Hardcoded known paths
     known = [
         "/usr/bin/retroarch",
         "/usr/bin/retroarch32",
@@ -40,18 +31,15 @@ def find_targets():
         if os.path.exists(k):
             found.add(k)
             
-    # Search recursively
     for d in SEARCH_DIRS:
         if not os.path.exists(d):
             continue
         print(f"Searching for retroarch binaries in {d}...")
         for root, dirs, files in os.walk(d):
-            # Prune directories to speed up search
             if "games" in dirs: dirs.remove("games")
             if "saves" in dirs: dirs.remove("saves")
             
             for file in files:
-                # Check for retroarch binaries, skipping common non-binary files
                 if file.startswith("retroarch") and not file.endswith((".cfg", ".txt", ".sh", ".bak", ".lpl", ".so")):
                     found.add(os.path.join(root, file))
     return list(found)
@@ -68,30 +56,32 @@ def patch_file(path):
     any_replaced = False
     new_data = data
     
-    for url in VARIATIONS:
-        if url in new_data:
-            count = new_data.count(url)
-            print(f"  Found {count} instances of URL: {url.decode()}")
-            
-            # Use /././ padding which is standard for "current directory" in paths
-            # This is much more compatible than multiple slashes
-            padding_len = len(url) - len(TARGET_BASE)
-            
-            if padding_len < 0:
-                # If target is somehow longer, we truncate (shouldn't happen with localhost)
-                padded_target = TARGET_BASE[:len(url)]
+    # We define precise pairs to maintain exact length
+    # No extra slashes or dots needed
+    pairs = [
+        (b"https://retroachievements.org/dorequest.php", b"http://127.000.000.001:08000/dorequest.php"),
+        (b"http://retroachievements.org/dorequest.php",  b"http://127.000.000.001:08000/dorequest.php "), # Add a space if needed
+        (b"https://retroachievements.org/",             b"http://127.000.000.001:08000//"),
+        (b"http://retroachievements.org/",              b"http://127.000.000.001:08000/ "),
+        (b"https://retroachievements.org",              b"http://127.000.000.001:08000/"),
+        (b"http://retroachievements.org",               b"http://127.000.000.001:08000 "),
+        (b"media.retroachievements.org",                b"127.000.000.001:08000/badge")
+    ]
+    
+    for old, new in pairs:
+        # Final length check to be safe
+        if len(old) != len(new):
+            # Dynamic padding for any missed cases
+            if len(new) < len(old):
+                new = new + (b"/" * (len(old) - len(new)))
             else:
-                # Start with a slash to separate host from padding
-                pad_str = b"/"
-                remaining = padding_len - 1
-                # Fill remaining with ././
-                pad_str += (b"./" * (remaining // 2))
-                if remaining % 2 == 1:
-                    pad_str += b"."
-                padded_target = TARGET_BASE + pad_str
-                
-            print(f"  Replacing with: {padded_target.decode()}")
-            new_data = new_data.replace(url, padded_target)
+                new = new[:len(old)]
+
+        if old in new_data:
+            count = new_data.count(old)
+            print(f"  Found {count} instances of URL: {old.decode()}")
+            print(f"  Replacing with: {new.decode()}")
+            new_data = new_data.replace(old, new)
             any_replaced = True
             
     if any_replaced:
@@ -106,14 +96,10 @@ def patch_file(path):
         print(f"  Successfully patched {path}!")
         return True
     
-    if TARGET_BASE in data:
-        print("  Already patched.")
-    else:
-        print("  No RetroAchievements patterns found.")
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v3 - Clean URL Mode) starting...")
+    print("LAHEE RetroArch Golden Patcher (v4 - Padded IP Mode) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
@@ -122,4 +108,4 @@ if __name__ == "__main__":
         if patch_file(t):
             patched_count += 1
             
-    print(f"\nNuclear Patch Complete. Total files patched: {patched_count}")
+    print(f"\nGolden Patch Complete. Total files patched: {patched_count}")
