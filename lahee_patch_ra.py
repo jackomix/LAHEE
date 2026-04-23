@@ -12,7 +12,6 @@ SEARCH_DIRS = [
     "."
 ]
 
-# The standard address - we will null-terminate it
 TARGET_HOST = b"http://127.0.0.1:8000"
 
 PATTERNS = [
@@ -65,16 +64,20 @@ def patch_file(path):
             count = new_data.count(old)
             print(f"  Found {count} instances of: {old.decode()}")
             
-            # Null-termination method (The "README" way)
-            # We overwrite the start of the string and fill the rest with null bytes.
-            # This is the safest way for C-based programs like RetroArch.
+            # Path-Safe Padding (/././)
+            # We preserve the original length but use dots to keep it valid
             padding_len = len(old) - len(new)
-            if padding_len >= 0:
-                padded_new = new + (b"\x00" * padding_len)
+            if padding_len > 0:
+                pad = b"/"
+                remaining = padding_len - 1
+                pad += (b"./" * (remaining // 2))
+                if remaining % 2 == 1:
+                    pad += b"."
+                padded_new = new + pad
             else:
                 padded_new = new[:len(old)]
                 
-            print(f"  Replacing with null-terminated host.")
+            print(f"  Replacing with path-safe host: {padded_new.decode()}")
             new_data = new_data.replace(old, padded_new)
             any_replaced = True
             
@@ -90,12 +93,10 @@ def patch_file(path):
         print(f"  Successfully patched {path}!")
         return True
     
-    if TARGET_HOST in data:
-        print("  Already patched with local host.")
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v8 - Null Termination Mode) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v9 - Path-Safe /./ Mode) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
