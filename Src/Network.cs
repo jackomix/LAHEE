@@ -791,14 +791,14 @@ static class Routes {
             if (string.IsNullOrEmpty(ach.BadgeLockedURL)) ach.BadgeLockedURL = Network.LocalUrl + "Badge/" + ach.BadgeName + "_lock.png";
         }
 
-        RAPatchResponseV2 response = new RAPatchResponseV2() {
+        RAAchievementSetsResponse response = new RAAchievementSetsResponse() {
             Success = true,
-            GameID = game.ID,
+            GameId = game.ID,
             Title = game.Title,
-            ImageIconURL = game.ImageIconURL,
-            RichPresenceGameID = game.ID,
+            ImageIconUrl = game.ImageIconURL,
+            RichPresenceGameId = game.ID,
             RichPresencePatch = game.RichPresencePatch,
-            ConsoleID = game.ConsoleID,
+            ConsoleId = game.ConsoleID,
             Sets = sets
         };
 

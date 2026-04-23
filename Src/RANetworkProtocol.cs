@@ -30,47 +30,36 @@ class RALoginResponse : RAAnyResponse {
 }
 
 class RAGameIDResponse : RAAnyResponse {
-    // Both variations for identification
-    [JsonProperty("GameID")]
     public uint GameID;
-    
-    [JsonProperty("GameId")]
-    public uint GameId => GameID;
 }
 
 class RAPatchResponse : RAAnyResponse {
     public GameData PatchData;
 }
 
+// Model for r=achievementsets (Requires CamelCase Id/Url)
+class RAAchievementSetsResponse : RAAnyResponse {
+    public uint GameId;
+    public String Title;
+    public String ImageIconUrl;
+    public uint RichPresenceGameId;
+    public String RichPresencePatch;
+    public int ConsoleId;
+    public List<SetData> Sets;
+}
+
+// Model for r=patch (Requires All-Caps ID/URL)
 class RAPatchResponseV2 : RAAnyResponse {
     [JsonProperty("GameID")]
     public uint GameID;
-
-    [JsonProperty("GameId")]
-    public uint GameId => GameID;
-
     public String Title;
-    
     [JsonProperty("ImageIconURL")]
     public String ImageIconURL;
-
-    [JsonProperty("ImageIconUrl")]
-    public String ImageIconUrl => ImageIconURL;
-
     [JsonProperty("RichPresenceGameID")]
     public uint RichPresenceGameID;
-
-    [JsonProperty("RichPresenceGameId")]
-    public uint RichPresenceGameId => RichPresenceGameID;
-
     public String RichPresencePatch;
-    
     [JsonProperty("ConsoleID")]
     public int ConsoleID;
-
-    [JsonProperty("ConsoleId")]
-    public int ConsoleId => ConsoleID;
-
     public List<SetData> Sets;
 }
 
@@ -95,13 +84,8 @@ class RAStartSessionResponse : RAAnyResponse {
 
 class RAAchievementListResponse : RAAnyResponse {
     public int[] UserUnlocks;
-    
     [JsonProperty("GameID")]
     public int GameID;
-
-    [JsonProperty("GameId")]
-    public int GameId => GameID;
-
     public bool HardcoreMode;
 }
 
