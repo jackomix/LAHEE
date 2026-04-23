@@ -81,14 +81,16 @@ static class StaticDataManager {
 
         foreach (GameData game in gameData.Values) {
             string resourceHost = Program.Config.Get("LAHEE", "ImageResourceHost");
-            Network.CorrectResourcePath(resourceHost, ref game.ImageIcon);
-            Network.CorrectResourcePath(resourceHost, ref game.ImageIconURL);
+            game.ImageIcon = Network.CorrectResourcePath(resourceHost, game.ImageIcon);
+            game.ImageIconURL = Network.CorrectResourcePath(resourceHost, game.ImageIconURL);
             game.AchievementSets.ForEach(set => {
-                Network.CorrectResourcePath(resourceHost, ref set.ImageIconURL);
-                set.Achievements.ForEach(ach => {
-                    Network.CorrectResourcePath(resourceHost, ref ach.BadgeLockedURL);
-                    Network.CorrectResourcePath(resourceHost, ref ach.BadgeURL);
-                });
+                set.ImageIconURL = Network.CorrectResourcePath(resourceHost, set.ImageIconURL);
+                if (set.Achievements != null) {
+                    set.Achievements.ForEach(ach => {
+                        ach.BadgeLockedURL = Network.CorrectResourcePath(resourceHost, ach.BadgeLockedURL);
+                        ach.BadgeURL = Network.CorrectResourcePath(resourceHost, ach.BadgeURL);
+                    });
+                }
             });
         }
 

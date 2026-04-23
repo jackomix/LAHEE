@@ -26,14 +26,14 @@ public enum AchievementFlags {
 
 public class AchievementData {
     public int ID;
-    public string MemAddr;
-    public string Title;
-    public string Description;
+    public string MemAddr = "";
+    public string Title = "";
+    public string Description = "";
     public int Points;
-    public string Author;
+    public string Author = "";
     public long Modified;
     public long Created;
-    public string BadgeName;
+    public string BadgeName = "";
     public AchievementFlags Flags;
     public int DisplayOrder;
 
@@ -42,8 +42,8 @@ public class AchievementData {
 
     public float Rarity;
     public float RarityHardcore;
-    public string BadgeURL;
-    public string BadgeLockedURL;
+    public string BadgeURL = "";
+    public string BadgeLockedURL = "";
 
     internal static AchievementType? ConvertType(string type) {
         switch (type) {
