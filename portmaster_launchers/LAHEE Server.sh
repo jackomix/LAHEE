@@ -17,6 +17,10 @@ source $controlfolder/control.txt
 GAMEDIR="/$directory/ports/LAHEE"
 cd $GAMEDIR
 
+# Ensure loopback interface is up for offline play
+$ESUDO ip link set lo up
+$ESUDO ifconfig lo 127.0.0.1 up > /dev/null 2>&1
+
 # Give execute permissions
 $ESUDO chmod +x "$GAMEDIR/LAHEE"
 
