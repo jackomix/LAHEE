@@ -58,6 +58,9 @@ static class Network {
         server.Routes.PreAuthentication.Content.Add(BASE_DIR + "UserPic/", true);
         server.Routes.PreAuthentication.Content.Add(BASE_DIR + "Web/", true);
 
+        // Fast-fail for UserPic to prevent 10s hang
+        server.Routes.PreAuthentication.Dynamic.Add(HttpMethod.GET, new System.Text.RegularExpressions.Regex(BASE_DIR + "UserPic/.*"), Routes.FastFailUserPic);
+
         server.Routes.PostRouting = Routes.PostRouting;
 
         RARoutes = new Dictionary<string, Func<HttpContextBase, Task>>();
@@ -131,6 +134,12 @@ static class Routes {
     internal static async Task RedirectWeb(HttpContextBase ctx) {
         ctx.Response.Headers.Add("Location", Network.BASE_DIR + "Web/");
         ctx.Response.StatusCode = 308;
+        await ctx.Response.Send();
+    }
+
+    internal static async Task FastFailUserPic(HttpContextBase ctx) {
+        // Immediately fail with 404 so RetroArch doesn't hang the login process
+        ctx.Response.StatusCode = 404;
         await ctx.Response.Send();
     }
 

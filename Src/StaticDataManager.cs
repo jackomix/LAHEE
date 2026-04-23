@@ -348,9 +348,11 @@ static class StaticDataManager {
     }
 
     public static string LocalifyUrl(string url) {
+        if (url == null) return null;
         return url
                 .Replace("https://media.retroachievements.org", "")
                 .Replace("https://retroachievements.org", "")
+                .Replace("http://localhost:8000", "http://127.0.0.1:8000") // Scrubber
                 .Replace("/Images/", "/Badge/")
             ;
     }

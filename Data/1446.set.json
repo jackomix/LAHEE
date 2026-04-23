@@ -3,8 +3,8 @@
   "ID": 1446,
   "Title": "Super Mario Bros.",
   "ConsoleID": 7,
-  "ImageIcon": "http://localhost:8000/laheer/Badge/026368.png",
-  "ImageIconUrl": "http://localhost:8000/laheer/Badge/026368.png",
+  "ImageIcon": "http://127.0.0.1:8000/laheer/Badge/026368.png",
+  "ImageIconUrl": "http://127.0.0.1:8000/laheer/Badge/026368.png",
   "RichPresencePatch": "",
   "AchievementSets": [
     {
@@ -12,7 +12,7 @@
       "Type": "core",
       "AchievementSetId": 1,
       "GameId": 1446,
-      "ImageIconUrl": "http://localhost:8000/laheer/Badge/026368.png",
+      "ImageIconUrl": "http://127.0.0.1:8000/laheer/Badge/026368.png",
       "Achievements": [
         {
           "ID": 3159,
@@ -27,8 +27,8 @@
           "Flags": 3,
           "DisplayOrder": 1,
           "Type": "progression",
-          "BadgeURL": "http://localhost:8000/laheer/Badge/026368.png",
-          "BadgeLockedURL": "http://localhost:8000/laheer/Badge/026368_lock.png"
+          "BadgeURL": "http://127.0.0.1:8000/laheer/Badge/026368.png",
+          "BadgeLockedURL": "http://127.0.0.1:8000/laheer/Badge/026368_lock.png"
         },
         {
           "ID": 3160,
@@ -43,8 +43,8 @@
           "Flags": 3,
           "DisplayOrder": 2,
           "Type": "progression",
-          "BadgeURL": "http://localhost:8000/laheer/Badge/026369.png",
-          "BadgeLockedURL": "http://localhost:8000/laheer/Badge/026369_lock.png"
+          "BadgeURL": "http://127.0.0.1:8000/laheer/Badge/026369.png",
+          "BadgeLockedURL": "http://127.0.0.1:8000/laheer/Badge/026369_lock.png"
         }
       ],
       "Leaderboards": []
