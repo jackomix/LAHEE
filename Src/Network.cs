@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Drawing.Imaging;
 using HttpMultipartParser;
@@ -16,7 +16,8 @@ namespace LAHEE;
 
 static class Network {
     public const string LOCAL_HOST = "localhost";
-    public const string BASE_DIR = "/";
+    // Moving BASE_DIR to /laheer/ to match the 21-character binary patch
+    public const string BASE_DIR = "/laheer/";
     public static string LocalUrl;
 
     internal const string RA_ROUTE_HEADER = "X-RA-Route";
@@ -33,20 +34,21 @@ static class Network {
         server = new WebserverLite(new WebserverSettings("0.0.0.0", localPort), Routes.DefaultNotFoundRoute);
 
         server.Events.Logger += WatsonLogger;
-        server.Settings.Debug.Responses = true;
-        server.Settings.Debug.Requests = true;
-        server.Settings.Debug.Routing = true;
+        server.Settings.Debug.Responses = Program.Config.GetBool("Watson", "DebugResponses");
+        server.Settings.Debug.Requests = Program.Config.GetBool("Watson", "DebugRequests");
+        server.Settings.Debug.Routing = Program.Config.GetBool("Watson", "DebugRouting");
 
+        // UI Redirect (from root to the new Web folder location)
+        server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, "/", Routes.RedirectWeb, Routes.DefaultErrorRoute);
         server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR, Routes.RedirectWeb, Routes.DefaultErrorRoute);
+
+        // Standard RA Routes (now in /laheer/ subfolder)
         server.Routes.PreAuthentication.Static.Add(HttpMethod.OPTIONS, BASE_DIR + "dorequest.php", Routes.DisableCors, Routes.DefaultErrorRoute);
         server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR + "dorequest.php", Routes.RARequestRoute, Routes.DefaultErrorRoute);
-        
-        // Dynamic route to handle slash-padded requests from binary patches
-        server.Routes.PreAuthentication.Dynamic.Add(HttpMethod.POST, new System.Text.RegularExpressions.Regex("dorequest.php"), Routes.RARequestRoute);
-        server.Routes.PreAuthentication.Dynamic.Add(HttpMethod.GET, new System.Text.RegularExpressions.Regex("dorequest.php"), Routes.RARequestRoute);
-
+        server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR + "dorequest.php", Routes.RARequestRoute, Routes.DefaultErrorRoute);
         server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR + "doupload.php", Routes.RAUploadRoute, Routes.DefaultErrorRoute);
 
+        // Content (Badge, UserPic, Web) now also under /laheer/
         server.Routes.PreAuthentication.Content = new CacheableContentRouteManager(Program.Config.GetInt("Watson", "ResourceCacheSeconds"));
         server.Routes.PreAuthentication.Content.Add(BASE_DIR + "Badge/", true);
         server.Routes.PreAuthentication.Content.Add(BASE_DIR + "UserPic/", true);
@@ -122,7 +124,8 @@ static class Routes {
     }
 
     internal static async Task RedirectWeb(HttpContextBase ctx) {
-        ctx.Response.Headers.Add("Location", "Web/");
+        // Redirect to the new subfolder Web UI
+        ctx.Response.Headers.Add("Location", Network.BASE_DIR + "Web/");
         ctx.Response.StatusCode = 308;
         await ctx.Response.Send();
     }
@@ -457,7 +460,7 @@ static class Routes {
         // uint gameId = UInt32.Parse(ctx.Request.GetParameter("g"));
         //String verification = ctx.Request.GetParameter("v");
 
-        GameData game = StaticDataManager.FindGameDataByHash(gamehash);
+        GameData game = StaticDataManager.FindGameDataByHash(hash: gamehash);
         if (game == null) {
             Log.User.LogWarning("ROM Hash {hash} not registered!", gamehash);
             await ctx.Response.SendJson(new RAErrorResponse("ROM hash is not registered!"));

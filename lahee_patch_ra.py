@@ -51,33 +51,39 @@ def patch_file(path):
     any_replaced = False
     new_data = data
 
-    # v13: Padded Port Zeros Mode
-    # We use leading zeros in the port to maintain 100% identical string length.
-    # 'https://retroachievements.org' (29 chars) -> 'http://127.0.0.1:00000008000' (29 chars)
-    # 'http://retroachievements.org'  (28 chars) -> 'http://127.0.0.1:0000008000'  (28 chars)
+    # v14: The "Surgical Folder" Method
+    # We use a subfolder /laheer/ to match the character length perfectly.
+    
+    # 21 chars: retroachievements.org
+    # 21 chars: 127.0.0.1:8000/laheer
+    
+    # 29 chars: https://retroachievements.org
+    # 29 chars: http://127.0.0.1:8000/laheer/
+    
+    # 27 chars: media.retroachievements.org
+    # 27 chars: 127.0.0.1:8000/laheer/badge
     
     PATTERNS = [
-        (b"https://retroachievements.org", b"http://127.0.0.1:00000008000"),
-        (b"http://retroachievements.org",  b"http://127.0.0.1:0000008000"),
-        (b"media.retroachievements.org",   b"127.0.0.1:00000000000008000")
+        (b"https://retroachievements.org", b"http://127.0.0.1:8000/laheer/"),
+        (b"http://retroachievements.org",  b"http://127.0.0.1:8000/laheer"),
+        (b"media.retroachievements.org",   b"127.0.0.1:8000/laheer/badge"),
+        (b"retroachievements.org",         b"127.0.0.1:8000/laheer")
     ]
     
+    # Sort by length descending to match longest first
+    PATTERNS.sort(key=lambda x: len(x[0]), reverse=True)
+
     for old, new in PATTERNS:
         if old in new_data:
             count = new_data.count(old)
             print(f"  Found {count} instances of: {old.decode()}")
             
-            # Ensure length match is perfect
             if len(old) != len(new):
-                # Small adjustment if my manual counts were off
-                if len(new) < len(old):
-                    # We can't really pad with zeros easily if we don't know the exact split, 
-                    # but for these specific strings the logic above is hardcoded.
-                    new = new + (b"/" * (len(old) - len(new)))
-                else:
-                    new = new[:len(old)]
+                # This should not happen with our calculated mapping
+                print(f"  [ERROR] Length mismatch: {old.decode()} ({len(old)}) vs {new.decode()} ({len(new)})")
+                continue
                 
-            print(f"  Replacing with padded port: {new.decode()}")
+            print(f"  Replacing with: {new.decode()}")
             new_data = new_data.replace(old, new)
             any_replaced = True
             
@@ -96,7 +102,7 @@ def patch_file(path):
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v13 - Padded Port Zeros) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v14 - Surgical Folder Mode) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
