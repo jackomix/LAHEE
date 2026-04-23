@@ -407,7 +407,7 @@ static class Routes {
         //int hardcoreFlag = Int32.Parse(ctx.Request.GetParameter("h")); // 1/0
         // int secondsSinceUnlock = ctx.Request.GetParameter("o");
 
-        GameData game = StaticDataManager.FindGameDataByHash(gameHash);
+        GameData game = StaticDataManager.FindGameDataByHash(gamehash);
         if (game == null) {
             Log.User.LogWarning("ROM Hash {hash} not registered!", gameHash);
             await ctx.Response.SendJson(new RAErrorResponse("ROM hash is not registered!"));
@@ -460,7 +460,7 @@ static class Routes {
         // uint gameId = UInt32.Parse(ctx.Request.GetParameter("g"));
         //String verification = ctx.Request.GetParameter("v");
 
-        GameData game = StaticDataManager.FindGameDataByHash(hash: gamehash);
+        GameData game = StaticDataManager.FindGameDataByHash(gamehash);
         if (game == null) {
             Log.User.LogWarning("ROM Hash {hash} not registered!", gamehash);
             await ctx.Response.SendJson(new RAErrorResponse("ROM hash is not registered!"));
