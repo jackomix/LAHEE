@@ -16,7 +16,6 @@ namespace LAHEE;
 
 static class Network {
     public const string LOCAL_HOST = "localhost";
-    // Moving BASE_DIR to /laheer/ to match the 21-character binary patch
     public const string BASE_DIR = "/laheer/";
     public static string LocalUrl;
 
@@ -38,17 +37,22 @@ static class Network {
         server.Settings.Debug.Requests = Program.Config.GetBool("Watson", "DebugRequests");
         server.Settings.Debug.Routing = Program.Config.GetBool("Watson", "DebugRouting");
 
-        // UI Redirect (from root to the new Web folder location)
         server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, "/", Routes.RedirectWeb, Routes.DefaultErrorRoute);
         server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR, Routes.RedirectWeb, Routes.DefaultErrorRoute);
 
-        // Standard RA Routes (now in /laheer/ subfolder)
         server.Routes.PreAuthentication.Static.Add(HttpMethod.OPTIONS, BASE_DIR + "dorequest.php", Routes.DisableCors, Routes.DefaultErrorRoute);
+        
+        // Handle BOTH single and double slashes created by length-matched binary patching
+        // This is the simplest way to support the surgical folder method
         server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR + "dorequest.php", Routes.RARequestRoute, Routes.DefaultErrorRoute);
         server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR + "dorequest.php", Routes.RARequestRoute, Routes.DefaultErrorRoute);
+        
+        server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR + "/dorequest.php", Routes.RARequestRoute, Routes.DefaultErrorRoute);
+        server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR + "/dorequest.php", Routes.RARequestRoute, Routes.DefaultErrorRoute);
+
         server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR + "doupload.php", Routes.RAUploadRoute, Routes.DefaultErrorRoute);
 
-        // Content (Badge, UserPic, Web) now also under /laheer/
+        // Content
         server.Routes.PreAuthentication.Content = new CacheableContentRouteManager(Program.Config.GetInt("Watson", "ResourceCacheSeconds"));
         server.Routes.PreAuthentication.Content.Add(BASE_DIR + "Badge/", true);
         server.Routes.PreAuthentication.Content.Add(BASE_DIR + "UserPic/", true);
@@ -124,7 +128,6 @@ static class Routes {
     }
 
     internal static async Task RedirectWeb(HttpContextBase ctx) {
-        // Redirect to the new subfolder Web UI
         ctx.Response.Headers.Add("Location", Network.BASE_DIR + "Web/");
         ctx.Response.StatusCode = 308;
         await ctx.Response.Send();
