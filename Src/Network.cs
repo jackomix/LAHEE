@@ -106,10 +106,11 @@ static class Network {
         server.Stop();
     }
 
-    public static void CorrectResourcePath(string resourceHost, ref string url) {
+    public static string CorrectResourcePath(string resourceHost, string url) {
         if (url != null && !url.StartsWith("http")) {
-            url = resourceHost + url;
+            return resourceHost + url;
         }
+        return url;
     }
 }
 
@@ -785,19 +786,22 @@ static class Routes {
 
         // Final safety check to prevent RetroArch C-library Null-Pointer crashes
         int order = 1;
-        foreach (var set in sets) {
-            if (string.IsNullOrEmpty(set.Title)) set.Title = game.Title ?? "Unknown";
-            if (string.IsNullOrEmpty(set.ImageIconURL)) set.ImageIconURL = game.ImageIconURL ?? "";
-            
-            if (set.Achievements != null) {
-                foreach (var ach in set.Achievements) {
-                    if (ach.DisplayOrder == 0) ach.DisplayOrder = order++;
-                    if (string.IsNullOrEmpty(ach.Title)) ach.Title = "Unknown";
-                    if (string.IsNullOrEmpty(ach.Description)) ach.Description = "Unknown";
-                    if (string.IsNullOrEmpty(ach.Author)) ach.Author = "Unknown";
-                    if (string.IsNullOrEmpty(ach.BadgeName)) ach.BadgeName = "00000";
-                    if (string.IsNullOrEmpty(ach.BadgeURL)) ach.BadgeURL = Network.LocalUrl + "Badge/" + ach.BadgeName + ".png";
-                    if (string.IsNullOrEmpty(ach.BadgeLockedURL)) ach.BadgeLockedURL = Network.LocalUrl + "Badge/" + ach.BadgeName + "_lock.png";
+        if (sets != null) {
+            foreach (var set in sets) {
+                if (string.IsNullOrEmpty(set.Title)) set.Title = game.Title ?? "Unknown";
+                if (string.IsNullOrEmpty(set.ImageIconURL)) set.ImageIconURL = game.ImageIconURL ?? "";
+                
+                if (set.Achievements != null) {
+                    foreach (var ach in set.Achievements) {
+                        if (ach.DisplayOrder == 0) ach.DisplayOrder = order++;
+                        if (string.IsNullOrEmpty(ach.Title)) ach.Title = "Unknown";
+                        if (string.IsNullOrEmpty(ach.Description)) ach.Description = "Unknown";
+                        if (string.IsNullOrEmpty(ach.Author)) ach.Author = "Unknown";
+                        if (string.IsNullOrEmpty(ach.BadgeName)) ach.BadgeName = "00000";
+                        if (string.IsNullOrEmpty(ach.BadgeURL)) ach.BadgeURL = Network.LocalUrl + "Badge/" + ach.BadgeName + ".png";
+                        if (string.IsNullOrEmpty(ach.BadgeLockedURL)) ach.BadgeLockedURL = Network.LocalUrl + "Badge/" + ach.BadgeName + "_lock.png";
+                        if (string.IsNullOrEmpty(ach.MemAddr)) ach.MemAddr = "";
+                    }
                 }
             }
         }
