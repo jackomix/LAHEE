@@ -40,6 +40,11 @@ static class Network {
         server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR, Routes.RedirectWeb, Routes.DefaultErrorRoute);
         server.Routes.PreAuthentication.Static.Add(HttpMethod.OPTIONS, BASE_DIR + "dorequest.php", Routes.DisableCors, Routes.DefaultErrorRoute);
         server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR + "dorequest.php", Routes.RARequestRoute, Routes.DefaultErrorRoute);
+        
+        // Dynamic route to handle slash-padded requests from binary patches
+        server.Routes.PreAuthentication.Dynamic.Add(HttpMethod.POST, new System.Text.RegularExpressions.Regex("dorequest.php"), Routes.RARequestRoute);
+        server.Routes.PreAuthentication.Dynamic.Add(HttpMethod.GET, new System.Text.RegularExpressions.Regex("dorequest.php"), Routes.RARequestRoute);
+
         server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR + "doupload.php", Routes.RAUploadRoute, Routes.DefaultErrorRoute);
 
         server.Routes.PreAuthentication.Content = new CacheableContentRouteManager(Program.Config.GetInt("Watson", "ResourceCacheSeconds"));

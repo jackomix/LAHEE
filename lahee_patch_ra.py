@@ -55,10 +55,8 @@ def patch_file(path):
     new_data = data
 
     # v11: The "Slash-Padding" Method
-    # Web servers treat http://127.0.0.1:8000////dorequest.php exactly the same
-    # as http://127.0.0.1:8000/dorequest.php.
-    
     # We replace the domain and pad with slashes to maintain exact character length.
+    # Web servers collapse multiple slashes, making this the most compatible padding.
     PATTERNS = [
         (b"https://retroachievements.org", b"http://127.0.0.1:8000////////"), # 29 -> 29
         (b"http://retroachievements.org",  b"http://127.0.0.1:8000///////"),  # 28 -> 28
