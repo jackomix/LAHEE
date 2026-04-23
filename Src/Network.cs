@@ -247,6 +247,7 @@ static class Routes {
 
     internal static async Task RAGameId(HttpContextBase ctx) {
         string hash = ctx.Request.GetParameter("m");
+        Log.Network.LogInformation("[ HASH ] RetroArch is requesting Game ID for ROM: {hash}", hash);
 
         GameData game = StaticDataManager.FindGameDataByHash(hash);
         if (game == null) {
