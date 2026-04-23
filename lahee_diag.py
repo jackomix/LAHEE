@@ -4,49 +4,59 @@ import os
 import subprocess
 
 def test_connection():
-    print("--- LAHEE Connectivity Diagnostic ---")
-    
-    # 1. Test Loopback Interface
-    print("Testing internal network (127.0.0.1)...")
+    print("Checking LAHEE Server (127.0.0.1:8000)...")
     try:
+        # Test basic info endpoint
         url = "http://127.0.0.1:8000/dorequest.php?r=laheeinfo"
-        response = urllib.request.urlopen(url, timeout=2)
-        print(f"SUCCESS: Server responded with code {response.getcode()}")
+        response = urllib.request.urlopen(url, timeout=3)
+        print(f"  [ OK ] Server found! Code: {response.getcode()}")
     except Exception as e:
-        print(f"FAILED: Could not reach LAHEE server. Error: {e}")
-        print("Tip: Make sure the LAHEE Server is running!")
+        print(f"  [FAIL] Cannot reach server: {e}")
+        print("  Tip: Is 'LAHEE Server' running?")
 
-    # 2. Check for running RetroArch
-    print("\nChecking for running RetroArch processes...")
-    try:
-        ps = subprocess.check_output(["ps", "aux"]).decode()
-        ra_procs = [line for line in ps.split('\n') if 'retroarch' in line.lower()]
-        if ra_procs:
-            for p in ra_procs:
-                print(f"FOUND: {p}")
-        else:
-            print("NONE: RetroArch is not currently running.")
-    except:
-        print("Could not check process list.")
-
-    # 3. Verify Patch in common paths
-    print("\nChecking patch status of binaries...")
-    paths = ["/usr/bin/retroarch", "/opt/retroarch/bin/retroarch", "/roms/tools/retroarch", "retroarch"]
+    print("\nChecking RetroArch Patch Status...")
+    paths = [
+        "/usr/bin/retroarch",
+        "/opt/retroarch/bin/retroarch",
+        "/opt/retroarch/bin/retroarch32",
+        "retroarch"
+    ]
+    
+    found_any = False
     for p in paths:
         if os.path.exists(p):
+            found_any = True
             try:
                 with open(p, 'rb') as f:
                     data = f.read()
                     if b"127.0.0.1:8000" in data:
-                        print(f"PATCHED: {p}")
+                        print(f"  [ OK ] PATCHED: {p}")
                     elif b"retroachievements.org" in data:
-                        print(f"NOT PATCHED: {p}")
+                        print(f"  [ !! ] NOT PATCHED: {p}")
                     else:
-                        print(f"UNKNOWN: {p} (Binary looks modified or different)")
+                        # Check for older padding styles just in case
+                        if b"localhost:8000" in data:
+                            print(f"  [OLD] Patch uses localhost: {p}")
+                        else:
+                            print(f"  [??] Unknown State: {p}")
             except:
-                print(f"ERROR: Could not read {p}")
+                print(f"  [ERR] Permission denied: {p}")
 
-    print("\n--- Diagnostic Complete ---")
+    if not found_any:
+        print("  [ !! ] No RetroArch binaries found in standard paths.")
+
+    print("\nChecking for active processes...")
+    try:
+        ps = subprocess.check_output(["ps", "aux"]).decode().lower()
+        if "lahee" in ps:
+            print("  [ OK ] LAHEE Server is RUNNING.")
+        else:
+            print("  [ !! ] LAHEE Server is NOT running.")
+            
+        if "retroarch" in ps:
+            print("  [ OK ] RetroArch is currently RUNNING.")
+    except:
+        pass
 
 if __name__ == "__main__":
     test_connection()
