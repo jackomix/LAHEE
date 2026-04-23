@@ -35,6 +35,7 @@ public class AchievementData {
     public long Created;
     public string BadgeName;
     public AchievementFlags Flags;
+    public int DisplayOrder;
 
     [JsonConverter(typeof(StringEnumConverter))]
     public AchievementType? Type;

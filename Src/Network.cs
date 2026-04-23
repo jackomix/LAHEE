@@ -782,6 +782,14 @@ static class Routes {
             }
         }
 
+        // Final safety check to prevent RetroArch crashes
+        int order = 1;
+        foreach (var ach in sets.SelectMany(s => s.Achievements)) {
+            if (ach.DisplayOrder == 0) ach.DisplayOrder = order++;
+            if (string.IsNullOrEmpty(ach.BadgeURL)) ach.BadgeURL = LocalUrl + "Badge/" + ach.BadgeName + ".png";
+            if (string.IsNullOrEmpty(ach.BadgeLockedURL)) ach.BadgeLockedURL = LocalUrl + "Badge/" + ach.BadgeName + "_lock.png";
+        }
+
         RAPatchResponseV2 response = new RAPatchResponseV2() {
             Success = true,
             GameId = game.ID,

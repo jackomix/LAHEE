@@ -86,6 +86,24 @@ class Program {
 
         Console.CancelKeyPress += Console_CancelKeyPress;
 
+        // Support for running commands from command line arguments
+        if (args.Length > 0) {
+            string fullCmd = string.Join(" ", args);
+            Log.Main.LogInformation("Running command from CLI: {cmd}", fullCmd);
+            try {
+                ExecuteConsoleCommand(ParseConsoleCommand(fullCmd));
+            } catch (Exception ex) {
+                Log.Main.LogError("Error executing CLI command: {e}", ex);
+            }
+            
+            // If the command is 'fetch', we exit after completion
+            if (args[0].ToLower() == "fetch") {
+                Log.Main.LogInformation("Fetch command completed. Exiting.");
+                Console_CancelKeyPress(null, null);
+                return;
+            }
+        }
+
         while (true) {
             string line = Console.ReadLine();
 
