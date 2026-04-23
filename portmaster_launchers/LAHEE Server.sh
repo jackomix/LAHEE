@@ -27,8 +27,9 @@ $ESUDO killall -9 LAHEE 2>/dev/null
 # Try to run with local library path
 export LD_LIBRARY_PATH="$GAMEDIR:$LD_LIBRARY_PATH"
 
-# Start and capture ANY error immediately
-$ESUDO ./LAHEE > lahee.log 2> crash.log &
+# Start and keep alive by piping a persistent input to it
+# This prevents the console app from exiting when it sees no terminal
+tail -f /dev/null | $ESUDO ./LAHEE > lahee.log 2> crash.log &
 
 # Brief message on screen
 printf "\033c" >> /dev/tty1

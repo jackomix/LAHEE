@@ -15,7 +15,7 @@
       "Username": "",
       "Password": "",
       "AutoUpdateCodeNotes": false,
-      "CheckSetRevisions": true,
+      "CheckSetRevisions": false,
       "SetRevisionCheckCacheDays": 14,
       "SetRevisionCheckIncludeUnofficial": true,
       "SetRevisionCheckIgnoreGameIds": [
