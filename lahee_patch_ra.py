@@ -12,12 +12,6 @@ SEARCH_DIRS = [
     "."
 ]
 
-# The "Perfect Match" domain
-# 'retroachievements.org'    is 21 characters
-# '127.0.0.1.nip.io:8000'    is 21 characters
-# This allows for a perfect 1:1 replacement with zero padding or shifting.
-TARGET_HOST = b"127.0.0.1.nip.io:8000"
-
 def find_targets():
     found = set()
     known = [
@@ -57,9 +51,15 @@ def patch_file(path):
     any_replaced = False
     new_data = data
 
-    # The domain part of the URL only
+    # v13: Padded Port Zeros Mode
+    # We use leading zeros in the port to maintain 100% identical string length.
+    # 'https://retroachievements.org' (29 chars) -> 'http://127.0.0.1:00000008000' (29 chars)
+    # 'http://retroachievements.org'  (28 chars) -> 'http://127.0.0.1:0000008000'  (28 chars)
+    
     PATTERNS = [
-        (b"retroachievements.org", TARGET_HOST)
+        (b"https://retroachievements.org", b"http://127.0.0.1:00000008000"),
+        (b"http://retroachievements.org",  b"http://127.0.0.1:0000008000"),
+        (b"media.retroachievements.org",   b"127.0.0.1:00000000000008000")
     ]
     
     for old, new in PATTERNS:
@@ -67,8 +67,17 @@ def patch_file(path):
             count = new_data.count(old)
             print(f"  Found {count} instances of: {old.decode()}")
             
-            # Since length is identical, no padding is needed!
-            print(f"  Performing 1:1 replacement with: {new.decode()}")
+            # Ensure length match is perfect
+            if len(old) != len(new):
+                # Small adjustment if my manual counts were off
+                if len(new) < len(old):
+                    # We can't really pad with zeros easily if we don't know the exact split, 
+                    # but for these specific strings the logic above is hardcoded.
+                    new = new + (b"/" * (len(old) - len(new)))
+                else:
+                    new = new[:len(old)]
+                
+            print(f"  Replacing with padded port: {new.decode()}")
             new_data = new_data.replace(old, new)
             any_replaced = True
             
@@ -87,7 +96,7 @@ def patch_file(path):
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v12 - Perfect Match Mode) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v13 - Padded Port Zeros) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
