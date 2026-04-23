@@ -765,9 +765,9 @@ static class Routes {
                     Achievements = game.GetAllAchievements().ToList(),
                     Leaderboards = game.GetAllLeaderboards().ToList(),
                     AchievementSetId = 1,
-                    GameId = game.ID,
+                    GameID = game.ID,
                     Title = game.Title,
-                    ImageIconUrl = game.ImageIconURL,
+                    ImageIconURL = game.ImageIconURL,
                     Type = SetType.core
                 }
             };
@@ -793,12 +793,12 @@ static class Routes {
 
         RAPatchResponseV2 response = new RAPatchResponseV2() {
             Success = true,
-            GameId = game.ID,
+            GameID = game.ID,
             Title = game.Title,
-            ImageIconUrl = game.ImageIconURL,
-            RichPresenceGameId = game.ID,
+            ImageIconURL = game.ImageIconURL,
+            RichPresenceGameID = game.ID,
             RichPresencePatch = game.RichPresencePatch,
-            ConsoleId = game.ConsoleID,
+            ConsoleID = game.ConsoleID,
             Sets = sets
         };
 

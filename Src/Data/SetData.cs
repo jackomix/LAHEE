@@ -24,9 +24,10 @@ public class SetData {
     [JsonConverter(typeof(StringEnumConverter))]
     public SetType Type;
 
+    [JsonProperty("ID")]
     public int AchievementSetId;
-    public uint GameId;
-    public string ImageIconUrl;
+    public uint GameID;
+    public string ImageIconURL;
     public List<AchievementData> Achievements;
     public List<LeaderboardData> Leaderboards;
     [JsonIgnore] public string FileSource;

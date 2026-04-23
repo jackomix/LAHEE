@@ -42,12 +42,12 @@ class RAPatchResponse : RAAnyResponse {
 }
 
 class RAPatchResponseV2 : RAAnyResponse {
-    public uint GameId;
+    public uint GameID;
     public String Title;
-    public String ImageIconUrl;
-    public uint RichPresenceGameId;
+    public String ImageIconURL;
+    public uint RichPresenceGameID;
     public String RichPresencePatch;
-    public int ConsoleId;
+    public int ConsoleID;
     public List<SetData> Sets;
 }
 
