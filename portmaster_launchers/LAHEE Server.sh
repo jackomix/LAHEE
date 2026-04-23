@@ -14,20 +14,31 @@ fi
 
 source $controlfolder/control.txt
 
+# The program is in the LAHEE subdirectory
 GAMEDIR="/$directory/ports/LAHEE"
-cd $GAMEDIR
+cd "$GAMEDIR"
 
-# Give execute permissions
-$ESUDO chmod +x "$GAMEDIR/LAHEE"
+# Ensure all files are executable
+$ESUDO chmod -R +x .
 
 # Kill existing instance if running
 $ESUDO killall -9 LAHEE 2>/dev/null
 
-# Start in background, send output to a log file
-$ESUDO nohup ./LAHEE > lahee.log 2>&1 &
+# Try to run with local library path
+export LD_LIBRARY_PATH="$GAMEDIR:$LD_LIBRARY_PATH"
+
+# Start and capture ANY error immediately
+$ESUDO ./LAHEE > lahee.log 2> crash.log &
 
 # Brief message on screen
 printf "\033c" >> /dev/tty1
-echo "LAHEE Server started in background." >> /dev/tty1
+echo "LAHEE Server starting..." >> /dev/tty1
 sleep 2
+if ps aux | grep -v grep | grep -q "./LAHEE"; then
+    echo "Server is RUNNING." >> /dev/tty1
+else
+    echo "ERROR: Server failed to start!" >> /dev/tty1
+    echo "Check crash.log for details." >> /dev/tty1
+fi
+sleep 3
 printf "\033c" >> /dev/tty1
