@@ -17,6 +17,9 @@ public class SetData {
     public SetType Type;
 
     [JsonProperty("ID")]
+    public int ID => AchievementSetId;
+
+    [JsonProperty("AchievementSetId")]
     public int AchievementSetId;
 
     // We send both casing variations to ensure RetroArch compatibility
