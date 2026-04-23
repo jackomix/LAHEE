@@ -37,11 +37,14 @@ jobs:
         cp lahee_patch_ra.py ./publish_output/LAHEE/
         cp lahee_unpatch_ra.py ./publish_output/LAHEE/
         cp lahee_ui.py ./publish_output/LAHEE/
+        cp main.lua ./publish_output/LAHEE/
+        cp lahee_diag.py ./publish_output/LAHEE/
         
         cp "portmaster_launchers/LAHEE Server.sh" ./publish_output/
         cp "portmaster_launchers/LAHEE UI.sh" ./publish_output/
         cp "portmaster_launchers/LAHEE Patch RetroArch.sh" ./publish_output/
         cp "portmaster_launchers/LAHEE Unpatch RetroArch.sh" ./publish_output/
+        cp "portmaster_launchers/LAHEE Connectivity Test.sh" ./publish_output/
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
