@@ -9,16 +9,25 @@ def test_connection():
     # 1. Check Interface Status
     print("\n[1/4] Checking Network Interfaces...")
     try:
-        ifconfig = subprocess.check_output(["ifconfig"]).decode()
-        if "lo:" in ifconfig or "lo " in ifconfig:
-            if "UP" in ifconfig and "RUNNING" in ifconfig:
+        # Try ip addr first (modern)
+        try:
+            addr_out = subprocess.check_output(["ip", "addr"]).decode()
+            if "lo:" in addr_out or "lo " in addr_out:
+                if "UP" in addr_out and "LOWER_UP" in addr_out:
+                    print("  [ OK ] Internal Loopback (lo) is UP.")
+                else:
+                    print("  [ !! ] Loopback (lo) is DOWN. Internal networking is disabled!")
+            else:
+                print("  [ !! ] Loopback interface not found in 'ip addr'.")
+        except:
+            # Fallback to ifconfig
+            ifconfig = subprocess.check_output(["ifconfig"]).decode()
+            if "lo" in ifconfig and "UP" in ifconfig:
                 print("  [ OK ] Internal Loopback (lo) is UP.")
             else:
-                print("  [ !! ] Loopback (lo) is DOWN. This is why you get Connection Refused!")
-        else:
-            print("  [ !! ] Loopback interface not found!")
+                print("  [ !! ] Loopback (lo) is DOWN or missing.")
     except:
-        print("  [ ?? ] Could not run ifconfig.")
+        print("  [ ?? ] Could not run ip addr or ifconfig.")
 
     # 2. Check Process
     print("\n[2/4] Checking Processes...")

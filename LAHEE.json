@@ -8,7 +8,7 @@
     "DataDirectory": "Data",
     "UserDirectory": "User",
     "PresenceHistoryLimit": -1,
-    "AutoOpenBrowser": true,
+    "AutoOpenBrowser": false,
     "RAFetch": {
       "Url": "https://retroachievements.org",
       "WebApiKey": "",
