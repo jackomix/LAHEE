@@ -25,7 +25,7 @@ class Program {
         NAME = assemblyInfo.Name + "/" + assemblyInfo.Version + "-" + gitHash + " - Akechi Haruka";
     }
 
-    private static void Main() {
+    private static void Main(string[] args) {
         Console.Title = NAME;
 
         string path = Environment.ProcessPath;
