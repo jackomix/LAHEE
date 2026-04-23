@@ -84,7 +84,7 @@ static class StaticDataManager {
             Network.CorrectResourcePath(resourceHost, ref game.ImageIcon);
             Network.CorrectResourcePath(resourceHost, ref game.ImageIconURL);
             game.AchievementSets.ForEach(set => {
-                Network.CorrectResourcePath(resourceHost, ref set.ImageIconUrl);
+                Network.CorrectResourcePath(resourceHost, ref set.ImageIconURL);
                 set.Achievements.ForEach(ach => {
                     Network.CorrectResourcePath(resourceHost, ref ach.BadgeLockedURL);
                     Network.CorrectResourcePath(resourceHost, ref ach.BadgeURL);
@@ -221,8 +221,8 @@ static class StaticDataManager {
             Title = "Single: " + data.Title,
             Type = SetType.bonus,
             AchievementSetId = game.AchievementSets.Count + 1,
-            GameId = RAIntegrationAssertionWorkaround(game.ID),
-            ImageIconUrl = game.ImageIconURL,
+            GameID = RAIntegrationAssertionWorkaround(game.ID),
+            ImageIconURL = game.ImageIconURL,
             Achievements = new List<AchievementData>() {
                 data
             },

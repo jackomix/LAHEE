@@ -41,8 +41,8 @@ public class GameData {
         AchievementSets.Add(new SetData() {
             Title = legacy.Title,
             AchievementSetId = 1,
-            GameId = StaticDataManager.RAIntegrationAssertionWorkaround(legacy.ID),
-            ImageIconUrl = legacy.ImageIconURL,
+            GameID = legacy.ID,
+            ImageIconURL = legacy.ImageIconURL,
             Type = SetType.core,
             FileSource = null,
             Achievements = legacy.Achievements ?? new List<AchievementData>(),

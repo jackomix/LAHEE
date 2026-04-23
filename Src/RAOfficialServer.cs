@@ -80,11 +80,11 @@ public static class RAOfficialServer {
 
         GameData gameData = new GameData() {
             Title = patch.Title,
-            ID = patch.GameId,
-            ConsoleID = patch.ConsoleId,
-            ImageIconURL = patch.ImageIconUrl,
+            ID = patch.GameID,
+            ConsoleID = patch.ConsoleID,
+            ImageIconURL = patch.ImageIconURL,
             DataVersion = GameData.CURRENT_DATA_VERSION,
-            ImageIcon = patch.ImageIconUrl,
+            ImageIcon = patch.ImageIconURL,
             CodeNotes = new List<CodeNote>(),
             ROMHashes = new List<string>(),
             RichPresencePatch = patch.RichPresencePatch,
@@ -126,7 +126,7 @@ public static class RAOfficialServer {
 
         // modify game ids in subsets
         foreach (SetData set in patch.Sets) {
-            set.GameId = StaticDataManager.RAIntegrationAssertionWorkaround(overrideId);
+            set.GameID = StaticDataManager.RAIntegrationAssertionWorkaround(overrideId);
         }
 
         // remove "unsupported emulator"

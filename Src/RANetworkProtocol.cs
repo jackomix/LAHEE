@@ -72,7 +72,7 @@ class RAStartSessionResponse : RAAnyResponse {
 
 class RAAchievementListResponse : RAAnyResponse {
     public int[] UserUnlocks;
-    public int GameId;
+    public int GameID;
     public bool HardcoreMode;
 }
 
