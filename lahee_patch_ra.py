@@ -12,13 +12,8 @@ SEARCH_DIRS = [
     "."
 ]
 
+# Standard IP address
 TARGET_HOST = b"http://127.0.0.1:8000"
-
-PATTERNS = [
-    (b"https://retroachievements.org", TARGET_HOST),
-    (b"http://retroachievements.org",  TARGET_HOST),
-    (b"media.retroachievements.org",   b"127.0.0.1:8000/badge")
-]
 
 def find_targets():
     found = set()
@@ -58,27 +53,38 @@ def patch_file(path):
         
     any_replaced = False
     new_data = data
+
+    # v10: Surgical Length Matching with /./ padding
+    # We MUST maintain exact string length to avoid shifting the binary
+    # and we must avoid null terminators so the /dorequest.php part isn't ignored.
+    
+    # 29 chars: https://retroachievements.org
+    # 21 chars: http://127.0.0.1:8000
+    # Pad with 8 chars: /./././.
+    
+    # 28 chars: http://retroachievements.org
+    # Pad with 7 chars: /./././
+    
+    PATTERNS = [
+        (b"https://retroachievements.org", b"http://127.0.0.1:8000/./././."),
+        (b"http://retroachievements.org",  b"http://127.0.0.1:8000/./././"),
+        (b"media.retroachievements.org",   b"127.0.0.1:8000/./././././.")
+    ]
     
     for old, new in PATTERNS:
         if old in new_data:
             count = new_data.count(old)
             print(f"  Found {count} instances of: {old.decode()}")
             
-            # Path-Safe Padding (/././)
-            # We preserve the original length but use dots to keep it valid
-            padding_len = len(old) - len(new)
-            if padding_len > 0:
-                pad = b"/"
-                remaining = padding_len - 1
-                pad += (b"./" * (remaining // 2))
-                if remaining % 2 == 1:
-                    pad += b"."
-                padded_new = new + pad
-            else:
-                padded_new = new[:len(old)]
+            if len(old) != len(new):
+                # Fallback padding just in case I miscounted above
+                if len(new) < len(old):
+                    new = new + (b"/" * (len(old) - len(new)))
+                else:
+                    new = new[:len(old)]
                 
-            print(f"  Replacing with path-safe host: {padded_new.decode()}")
-            new_data = new_data.replace(old, padded_new)
+            print(f"  Replacing with length-matched: {new.decode()}")
+            new_data = new_data.replace(old, new)
             any_replaced = True
             
     if any_replaced:
@@ -96,7 +102,7 @@ def patch_file(path):
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v9 - Path-Safe /./ Mode) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v10 - Surgical /./ Mode) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
