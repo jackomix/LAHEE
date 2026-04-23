@@ -54,36 +54,22 @@ def patch_file(path):
     any_replaced = False
     new_data = data
 
-    # v10: Surgical Length Matching with /./ padding
-    # We MUST maintain exact string length to avoid shifting the binary
-    # and we must avoid null terminators so the /dorequest.php part isn't ignored.
+    # v11: The "Slash-Padding" Method
+    # Web servers treat http://127.0.0.1:8000////dorequest.php exactly the same
+    # as http://127.0.0.1:8000/dorequest.php.
     
-    # 29 chars: https://retroachievements.org
-    # 21 chars: http://127.0.0.1:8000
-    # Pad with 8 chars: /./././.
-    
-    # 28 chars: http://retroachievements.org
-    # Pad with 7 chars: /./././
-    
+    # We replace the domain and pad with slashes to maintain exact character length.
     PATTERNS = [
-        (b"https://retroachievements.org", b"http://127.0.0.1:8000/./././."),
-        (b"http://retroachievements.org",  b"http://127.0.0.1:8000/./././"),
-        (b"media.retroachievements.org",   b"127.0.0.1:8000/./././././.")
+        (b"https://retroachievements.org", b"http://127.0.0.1:8000////////"), # 29 -> 29
+        (b"http://retroachievements.org",  b"http://127.0.0.1:8000///////"),  # 28 -> 28
+        (b"media.retroachievements.org",   b"127.0.0.1:8000/badge//////")   # 27 -> 27
     ]
     
     for old, new in PATTERNS:
         if old in new_data:
             count = new_data.count(old)
             print(f"  Found {count} instances of: {old.decode()}")
-            
-            if len(old) != len(new):
-                # Fallback padding just in case I miscounted above
-                if len(new) < len(old):
-                    new = new + (b"/" * (len(old) - len(new)))
-                else:
-                    new = new[:len(old)]
-                
-            print(f"  Replacing with length-matched: {new.decode()}")
+            print(f"  Replacing with slash-padded: {new.decode()}")
             new_data = new_data.replace(old, new)
             any_replaced = True
             
@@ -102,7 +88,7 @@ def patch_file(path):
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v10 - Surgical /./ Mode) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v11 - Slash Padding Mode) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
