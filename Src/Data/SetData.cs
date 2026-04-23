@@ -26,8 +26,15 @@ public class SetData {
     [JsonProperty("GameID")]
     public uint GameID;
 
+    [JsonProperty("GameId")]
+    public uint GameId => GameID;
+
+    private string _imageIconUrl = "";
     [JsonProperty("ImageIconURL")]
-    public string ImageIconURL;
+    public string ImageIconURL { get => _imageIconUrl; set => _imageIconUrl = value ?? ""; }
+
+    [JsonProperty("ImageIconUrl")]
+    public string ImageIconUrl => ImageIconURL;
 
     public List<AchievementData> Achievements;
     public List<LeaderboardData> Leaderboards;

@@ -783,27 +783,56 @@ static class Routes {
             }
         }
 
-        // Final safety check to prevent RetroArch crashes
+        // Final safety check to prevent RetroArch C-library Null-Pointer crashes
         int order = 1;
-        foreach (var ach in sets.SelectMany(s => s.Achievements)) {
-            if (ach.DisplayOrder == 0) ach.DisplayOrder = order++;
-            if (string.IsNullOrEmpty(ach.BadgeURL)) ach.BadgeURL = Network.LocalUrl + "Badge/" + ach.BadgeName + ".png";
-            if (string.IsNullOrEmpty(ach.BadgeLockedURL)) ach.BadgeLockedURL = Network.LocalUrl + "Badge/" + ach.BadgeName + "_lock.png";
+        foreach (var set in sets) {
+            if (string.IsNullOrEmpty(set.Title)) set.Title = game.Title ?? "Unknown";
+            if (string.IsNullOrEmpty(set.ImageIconURL)) set.ImageIconURL = game.ImageIconURL ?? "";
+            
+            if (set.Achievements != null) {
+                foreach (var ach in set.Achievements) {
+                    if (ach.DisplayOrder == 0) ach.DisplayOrder = order++;
+                    if (string.IsNullOrEmpty(ach.Title)) ach.Title = "Unknown";
+                    if (string.IsNullOrEmpty(ach.Description)) ach.Description = "Unknown";
+                    if (string.IsNullOrEmpty(ach.Author)) ach.Author = "Unknown";
+                    if (string.IsNullOrEmpty(ach.BadgeName)) ach.BadgeName = "00000";
+                    if (string.IsNullOrEmpty(ach.BadgeURL)) ach.BadgeURL = Network.LocalUrl + "Badge/" + ach.BadgeName + ".png";
+                    if (string.IsNullOrEmpty(ach.BadgeLockedURL)) ach.BadgeLockedURL = Network.LocalUrl + "Badge/" + ach.BadgeName + "_lock.png";
+                }
+            }
         }
 
         RAAchievementSetsResponse response = new RAAchievementSetsResponse() {
             Success = true,
             GameId = game.ID,
-            Title = game.Title,
-            ImageIconUrl = game.ImageIconURL,
+            Title = game.Title ?? "Unknown",
+            ImageIconUrl = (game.ImageIconURL ?? game.ImageIconUrl) ?? "",
             RichPresenceGameId = game.ID,
-            RichPresencePatch = game.RichPresencePatch,
+            RichPresencePatch = game.RichPresencePatch ?? "",
             ConsoleId = game.ConsoleID,
             Sets = sets
         };
 
+        // Extra safety check for SetData to prevent NULL crashes in rcheevos array parser
+        if (response.Sets != null) {
+            foreach (var set in response.Sets) {
+                set.Title = set.Title ?? "Unknown";
+                set.ImageIconURL = set.ImageIconURL ?? "";
+                if (set.Achievements != null) {
+                    foreach (var ach in set.Achievements) {
+                        ach.Title = ach.Title ?? "Unknown";
+                        ach.Description = ach.Description ?? "Unknown";
+                        ach.Author = ach.Author ?? "Unknown";
+                        ach.BadgeName = ach.BadgeName ?? "00000";
+                        ach.MemAddr = ach.MemAddr ?? "";
+                    }
+                }
+            }
+        }
+
         await ctx.Response.SendJson(response);
-    }
+        }
+
 
     internal static async Task RALatestIntegration(HttpContextBase ctx) {
         RALatestIntegrationResponse response = new RALatestIntegrationResponse() {
