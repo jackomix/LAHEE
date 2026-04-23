@@ -12,12 +12,12 @@ SEARCH_DIRS = [
     "."
 ]
 
+# The standard address - we will null-terminate it
 TARGET_HOST = b"http://127.0.0.1:8000"
 
-# We only replace the domain parts to ensure /dorequest.php and other paths are preserved!
 PATTERNS = [
-    (b"https://retroachievements.org", b"http://127.0.0.1:8000"),
-    (b"http://retroachievements.org",  b"http://127.0.0.1:8000"),
+    (b"https://retroachievements.org", TARGET_HOST),
+    (b"http://retroachievements.org",  TARGET_HOST),
     (b"media.retroachievements.org",   b"127.0.0.1:8000/badge")
 ]
 
@@ -65,16 +65,16 @@ def patch_file(path):
             count = new_data.count(old)
             print(f"  Found {count} instances of: {old.decode()}")
             
-            # Use trailing slashes for padding. 
-            # This preserves the rest of the string (like /dorequest.php)
-            # because 'http://127.0.0.1:8000////dorequest.php' is a valid URL.
+            # Null-termination method (The "README" way)
+            # We overwrite the start of the string and fill the rest with null bytes.
+            # This is the safest way for C-based programs like RetroArch.
             padding_len = len(old) - len(new)
             if padding_len >= 0:
-                padded_new = new + (b"/" * padding_len)
+                padded_new = new + (b"\x00" * padding_len)
             else:
                 padded_new = new[:len(old)]
                 
-            print(f"  Replacing with: {padded_new.decode()}")
+            print(f"  Replacing with null-terminated host.")
             new_data = new_data.replace(old, padded_new)
             any_replaced = True
             
@@ -90,10 +90,12 @@ def patch_file(path):
         print(f"  Successfully patched {path}!")
         return True
     
+    if TARGET_HOST in data:
+        print("  Already patched with local host.")
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v7 - Path Preservation Mode) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v8 - Null Termination Mode) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
