@@ -27,8 +27,12 @@ $ESUDO killall -9 LAHEE 2>/dev/null
 # Try to run with local library path
 export LD_LIBRARY_PATH="$GAMEDIR:$LD_LIBRARY_PATH"
 
-# Start and keep alive by piping a persistent input to it
-# This prevents the console app from exiting when it sees no terminal
+# Ensure custom domain resolves to localhost for surgical patching
+if ! grep -q "127.0.0.1.nip.io" /etc/hosts; then
+    $ESUDO sh -c "echo '127.0.0.1 127.0.0.1.nip.io' >> /etc/hosts" 2>/dev/null
+fi
+
+# Start and keep alive
 tail -f /dev/null | $ESUDO ./LAHEE > lahee.log 2> crash.log &
 
 # Brief message on screen

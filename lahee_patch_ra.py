@@ -12,8 +12,11 @@ SEARCH_DIRS = [
     "."
 ]
 
-# The standard address
-TARGET_HOST = b"http://127.0.0.1:8000"
+# The "Perfect Match" domain
+# 'retroachievements.org'    is 21 characters
+# '127.0.0.1.nip.io:8000'    is 21 characters
+# This allows for a perfect 1:1 replacement with zero padding or shifting.
+TARGET_HOST = b"127.0.0.1.nip.io:8000"
 
 def find_targets():
     found = set()
@@ -54,42 +57,19 @@ def patch_file(path):
     any_replaced = False
     new_data = data
 
-    # v12: Full URL Null-Padding (The "Professional" Way)
-    # We find full URLs and replace them, filling the rest with null bytes.
-    # This preserves the paths (like /dorequest.php) while maintaining binary structure.
-    
+    # The domain part of the URL only
     PATTERNS = [
-        # Full URLs (Path included)
-        (b"https://retroachievements.org/dorequest.php", b"http://127.0.0.1:8000/dorequest.php"),
-        (b"http://retroachievements.org/dorequest.php",  b"http://127.0.0.1:8000/dorequest.php"),
-        
-        # Domain only
-        (b"https://retroachievements.org/", b"http://127.0.0.1:8000/"),
-        (b"http://retroachievements.org/",  b"http://127.0.0.1:8000/"),
-        (b"https://retroachievements.org",  b"http://127.0.0.1:8000"),
-        (b"http://retroachievements.org",   b"http://127.0.0.1:8000"),
-        
-        # Media
-        (b"media.retroachievements.org",   b"127.0.0.1:8000/badge")
+        (b"retroachievements.org", TARGET_HOST)
     ]
     
-    # We must sort patterns by length (longest first) to avoid partial matches
-    PATTERNS.sort(key=lambda x: len(x[0]), reverse=True)
-
     for old, new in PATTERNS:
         if old in new_data:
             count = new_data.count(old)
             print(f"  Found {count} instances of: {old.decode()}")
             
-            # Fill remaining space with Nulls
-            padding_len = len(old) - len(new)
-            if padding_len >= 0:
-                padded_new = new + (b"\x00" * padding_len)
-            else:
-                padded_new = new[:len(old)]
-                
-            print(f"  Replacing with null-padded string.")
-            new_data = new_data.replace(old, padded_new)
+            # Since length is identical, no padding is needed!
+            print(f"  Performing 1:1 replacement with: {new.decode()}")
+            new_data = new_data.replace(old, new)
             any_replaced = True
             
     if any_replaced:
@@ -107,7 +87,7 @@ def patch_file(path):
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v12 - Full URL Null-Padding) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v12 - Perfect Match Mode) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
