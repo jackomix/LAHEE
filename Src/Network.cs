@@ -15,7 +15,7 @@ using HttpMethod = WatsonWebserver.Core.HttpMethod;
 namespace LAHEE;
 
 static class Network {
-    public const string LOCAL_HOST = "localhost";
+    public const string LOCAL_HOST = "127.0.0.1";
     public const string BASE_DIR = "/laheer/";
     public static string LocalUrl;
 
