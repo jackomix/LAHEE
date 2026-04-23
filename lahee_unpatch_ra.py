@@ -25,9 +25,15 @@ def find_backups():
             if "saves" in dirs: dirs.remove("saves")
             
             for file in files:
+                # Only look for backups of the actual binaries
                 if file.startswith("retroarch") and file.endswith(".bak"):
+                    # Strict check: the original name (without .bak) must not be a config/script/etc
+                    original_name = file[:-4]
+                    if original_name.endswith((".cfg", ".txt", ".sh", ".lpl", ".so", ".png", ".zip")):
+                        continue
+                        
                     bak_path = os.path.join(root, file)
-                    original_path = bak_path[:-4] # Remove .bak
+                    original_path = os.path.join(root, original_name)
                     if os.path.exists(original_path):
                         found.append((bak_path, original_path))
     return found
