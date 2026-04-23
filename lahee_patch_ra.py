@@ -69,7 +69,7 @@ def patch_file(path):
             count = new_data.count(url)
             print(f"  Found {count} instances of URL: {url.decode()}")
             
-            # Use /./ as padding (it's very safe and standard)
+            # Use /./ as padding (requested /./ padding)
             padding_len = len(url) - len(TARGET_BASE)
             if padding_len > 0:
                 # Add a slash then ././
@@ -99,11 +99,11 @@ def patch_file(path):
         return True
     
     if TARGET_BASE in data:
-        print("  Already patched (or uses local address).")
+        print("  Already patched.")
     return False
 
 if __name__ == "__main__":
-    print("LAHEE RetroArch Nuclear Patcher (v5 - Loopback & Octal Fix) starting...")
+    print("LAHEE RetroArch Nuclear Patcher (v6 - /./ Padding Mode) starting...")
     targets = find_targets()
     print(f"Found {len(targets)} potential binaries to check.")
     
@@ -112,4 +112,4 @@ if __name__ == "__main__":
         if patch_file(t):
             patched_count += 1
             
-    print(f"\nNuclear Patch Complete. Total files patched: {patched_count}")
+    print(f"\nPatch Complete. Total files patched: {patched_count}")
