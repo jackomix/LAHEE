@@ -765,7 +765,7 @@ static class Routes {
                     Achievements = game.GetAllAchievements().ToList(),
                     Leaderboards = game.GetAllLeaderboards().ToList(),
                     AchievementSetId = 1,
-                    GameId = StaticDataManager.RAIntegrationAssertionWorkaround(game.ID),
+                    GameId = game.ID,
                     Title = game.Title,
                     ImageIconUrl = game.ImageIconURL,
                     Type = SetType.core
