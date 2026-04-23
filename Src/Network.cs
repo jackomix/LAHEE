@@ -39,7 +39,13 @@ static class Network {
 
         server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR, Routes.RedirectWeb, Routes.DefaultErrorRoute);
         server.Routes.PreAuthentication.Static.Add(HttpMethod.OPTIONS, BASE_DIR + "dorequest.php", Routes.DisableCors, Routes.DefaultErrorRoute);
+        
+        // Handle BOTH dorequest.php AND the root (/) to be safe against mangled patches
         server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR + "dorequest.php", Routes.RARequestRoute, Routes.DefaultErrorRoute);
+        server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR + "dorequest.php", Routes.RARequestRoute, Routes.DefaultErrorRoute);
+        server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR, Routes.RARequestRoute, Routes.DefaultErrorRoute);
+        server.Routes.PreAuthentication.Static.Add(HttpMethod.GET, BASE_DIR, Routes.RARequestRoute, Routes.DefaultErrorRoute);
+        
         server.Routes.PreAuthentication.Static.Add(HttpMethod.POST, BASE_DIR + "doupload.php", Routes.RAUploadRoute, Routes.DefaultErrorRoute);
 
         server.Routes.PreAuthentication.Content = new CacheableContentRouteManager(Program.Config.GetInt("Watson", "ResourceCacheSeconds"));
