@@ -1,11 +1,3 @@
-// ReSharper disable InconsistentNaming
-// ReSharper disable UnassignedField.Global
-// ReSharper disable FieldCanBeMadeReadOnly.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable NotAccessedField.Global
-// ReSharper disable UnusedMember.Global
-// ReSharper disable ClassNeverInstantiated.Global
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -26,8 +18,20 @@ public class SetData {
 
     [JsonProperty("ID")]
     public int AchievementSetId;
+
+    // We send both casing variations to ensure RetroArch compatibility
+    [JsonProperty("GameID")]
     public uint GameID;
+
+    [JsonProperty("GameId")]
+    public uint GameId => GameID;
+
+    [JsonProperty("ImageIconURL")]
     public string ImageIconURL;
+
+    [JsonProperty("ImageIconUrl")]
+    public string ImageIconUrl => ImageIconURL;
+
     public List<AchievementData> Achievements;
     public List<LeaderboardData> Leaderboards;
     [JsonIgnore] public string FileSource;

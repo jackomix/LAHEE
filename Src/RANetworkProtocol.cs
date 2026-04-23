@@ -1,11 +1,7 @@
-﻿using LAHEE.Data;
+using LAHEE.Data;
 using RATools.Data;
+using Newtonsoft.Json;
 using CodeNote = LAHEE.Data.CodeNote;
-
-// these are defined by RA, therefore disable checks
-
-// ReSharper disable All
-#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
 
 namespace LAHEE;
 
@@ -34,7 +30,12 @@ class RALoginResponse : RAAnyResponse {
 }
 
 class RAGameIDResponse : RAAnyResponse {
+    // Both variations for identification
+    [JsonProperty("GameID")]
     public uint GameID;
+    
+    [JsonProperty("GameId")]
+    public uint GameId => GameID;
 }
 
 class RAPatchResponse : RAAnyResponse {
@@ -42,12 +43,34 @@ class RAPatchResponse : RAAnyResponse {
 }
 
 class RAPatchResponseV2 : RAAnyResponse {
+    [JsonProperty("GameID")]
     public uint GameID;
+
+    [JsonProperty("GameId")]
+    public uint GameId => GameID;
+
     public String Title;
+    
+    [JsonProperty("ImageIconURL")]
     public String ImageIconURL;
+
+    [JsonProperty("ImageIconUrl")]
+    public String ImageIconUrl => ImageIconURL;
+
+    [JsonProperty("RichPresenceGameID")]
     public uint RichPresenceGameID;
+
+    [JsonProperty("RichPresenceGameId")]
+    public uint RichPresenceGameId => RichPresenceGameID;
+
     public String RichPresencePatch;
+    
+    [JsonProperty("ConsoleID")]
     public int ConsoleID;
+
+    [JsonProperty("ConsoleId")]
+    public int ConsoleId => ConsoleID;
+
     public List<SetData> Sets;
 }
 
@@ -72,7 +95,13 @@ class RAStartSessionResponse : RAAnyResponse {
 
 class RAAchievementListResponse : RAAnyResponse {
     public int[] UserUnlocks;
+    
+    [JsonProperty("GameID")]
     public int GameID;
+
+    [JsonProperty("GameId")]
+    public int GameId => GameID;
+
     public bool HardcoreMode;
 }
 
