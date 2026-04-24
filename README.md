@@ -45,6 +45,8 @@ This allows local/offline/modded progression of RetroAchievements.
 
 ## Usage
 
+For detailed technical information on LAHEE's architecture, API protocol, and patching mechanism, see the [Technical Documentation](docs/architecture.md).
+
 Latest stable release: https://github.com/akechi-haruka/LAHEE/releases
 
 Latest unstable development build: https://nightly.link/akechi-haruka/LAHEE/workflows/dotnet/master
