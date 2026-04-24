@@ -64,10 +64,18 @@ def patch_file(path):
     # 27 chars: 127.0.0.1:8000/laheer/badge
     
     PATTERNS = [
+        # Protocol-prefixed media URLs to avoid TLS handshake hang on HTTP port
+        (b"https://media.retroachievements.org", b"http://127.0.0.1:8000/laheer/Badge/"), # 35
+        (b"http://media.retroachievements.org",  b"http://127.0.0.1:8000/laheer/Badge"),  # 34
+
         (b"https://retroachievements.org", b"http://127.0.0.1:8000/laheer/"),
         (b"http://retroachievements.org",  b"http://127.0.0.1:8000/laheer"),
-        (b"media.retroachievements.org",   b"127.0.0.1:8000/laheer/badge"),
-        (b"retroachievements.org",         b"127.0.0.1:8000/laheer")
+        (b"media.retroachievements.org",   b"127.0.0.1:8000/laheer/Badge"),
+        (b"retroachievements.org",         b"127.0.0.1:8000/laheer"),
+        
+        # Fix already bad patches (https:// on port 8000)
+        (b"https://127.0.0.1:8000/laheer/Badge", b"http://127.0.0.1:8000/laheer/Badge/"), # 35
+        (b"https://127.0.0.1:8000/laheer/badge", b"http://127.0.0.1:8000/laheer/Badge/"), # 35
     ]
     
     # Sort by length descending to match longest first
