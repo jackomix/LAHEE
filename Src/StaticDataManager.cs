@@ -24,7 +24,6 @@ static class StaticDataManager {
 
     private static Dictionary<uint, GameData> gameData;
     private static Dictionary<uint, List<UserComment>> commentData;
-    private static Dictionary<string, GameData> hashIndex;  // Fast O(1) lookup for hashes instead of linear search
     private static int customAchievementIdNext = 5_000_000;
     public static GlobalData Global { get; private set; } = new GlobalData();
 
@@ -41,7 +40,6 @@ static class StaticDataManager {
     public static void InitializeAchievements(bool initial = false) {
         gameData = new Dictionary<uint, GameData>();
         commentData = new Dictionary<uint, List<UserComment>>();
-        hashIndex = new Dictionary<string, GameData>();
 
         string dir = GetDirectory() ?? "Data";
         if (!Directory.Exists(dir)) {
@@ -103,13 +101,6 @@ static class StaticDataManager {
             }
 
             Log.Data.LogWarning("All leaderboards have been disabled due to config settings.");
-        }
-
-        // Build hash index for fast O(1) lookups during login
-        foreach (GameData game in gameData.Values) {
-            foreach (string hash in game.ROMHashes) {
-                hashIndex[hash] = game;
-            }
         }
     }
 
@@ -336,7 +327,7 @@ static class StaticDataManager {
     }
 
     public static GameData FindGameDataByHash(string str) {
-        return hashIndex.GetValueOrDefault(str);
+        return gameData.FirstOrDefault(r => r.Value.ROMHashes.Contains(str)).Value;
     }
 
     public static GameData FindGameDataByName(string str, bool partial) {
