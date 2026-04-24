@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Haruka.Common.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using NReco.Logging.File;
 
 namespace LAHEE;
 
@@ -10,14 +13,27 @@ static class Log {
     public static ILogger RCheevos { get; private set; }
     public static ILogger Websocket { get; private set; }
 
+    private static ILoggerFactory factory;
+
     public static void Initialize() {
-        Haruka.Common.Log.Initialize();
-        Main = Haruka.Common.Log.GetOrCreate("Main");
-        Network = Haruka.Common.Log.GetOrCreate("Net ");
-        Data = Haruka.Common.Log.GetOrCreate("Data");
-        User = Haruka.Common.Log.GetOrCreate("User");
-        RCheevos = Haruka.Common.Log.GetOrCreate("Rche");
-        Websocket = Haruka.Common.Log.GetOrCreate("Webs");
+        IConfigurationSection loggingConfig = AppConfig.Primary.GetSection("Logging");
+
+        factory = LoggerFactory.Create(builder => builder
+            .AddConfiguration(loggingConfig)
+            .AddSimpleConsole(options => {
+                options.SingleLine = true;
+                options.TimestampFormat = "[HH:mm:ss.fff] ";
+            })
+            .AddDebug()
+            .AddFile(loggingConfig.GetSection("File"))
+        );
+
+        Main = factory.CreateLogger("Main");
+        Network = factory.CreateLogger("Net ");
+        Data = factory.CreateLogger("Data");
+        User = factory.CreateLogger("User");
+        RCheevos = factory.CreateLogger("Rche");
+        Websocket = factory.CreateLogger("Webs");
 
         Main.LogInformation("Local Achievements Home Enhanced Edition " + Program.NAME);
     }
