@@ -91,10 +91,6 @@ static class Network {
         AddRARoute("gameinfolist", Routes.RAGameInfoList);
         AddRARoute("getusersummary", Routes.RAUserSummary);
         AddRARoute("getgameinfoanduserprogress", Routes.RAGameInfoAndUserProgress);
-        }
-        Log.Network.LogInformation("Starting webserver on {H}:{P}", server.Settings.Hostname, server.Settings.Port);
-        server.Start();
-        Log.Network.LogDebug("Started.");
     }
 
     private static void WatsonLogger(string obj) {
