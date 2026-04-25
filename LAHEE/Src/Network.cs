@@ -89,7 +89,9 @@ static class Network {
         AddRARoute("hashlibrary", Routes.RAHashLibrary);
         AddRARoute("allprogress", Routes.RAAllProgress);
         AddRARoute("gameinfolist", Routes.RAGameInfoList);
-
+        AddRARoute("getusersummary", Routes.RAUserSummary);
+        AddRARoute("getgameinfoanduserprogress", Routes.RAGameInfoAndUserProgress);
+        }
         Log.Network.LogInformation("Starting webserver on {H}:{P}", server.Settings.Hostname, server.Settings.Port);
         server.Start();
         Log.Network.LogDebug("Started.");
@@ -1101,6 +1103,74 @@ static class Routes {
         RAGameInfoListResponse response = new RAGameInfoListResponse() {
             Success = true,
             Response = gameIds.Select(StaticDataManager.FindGameDataById).Where(game => game != null).ToArray()
+        };
+        await ctx.Response.SendJson(response);
+    }
+
+    internal static async Task RAUserSummary(HttpContextBase ctx) {
+        string username = ctx.Request.GetParameter("u");
+        UserData user = UserManager.GetUserData(username);
+        if (user == null) {
+            await ctx.Response.SendJson(new RAErrorResponse("User not found"));
+            return;
+        }
+
+        var response = new {
+            RecentlyPlayedCount = user.GameData.Count,
+            MemberSince = "2024-01-01",
+            Rank = "1",
+            Points = user.GetScore(true),
+            SoftPoints = user.GetScore(false),
+            UserPic = "/laheer/UserPic/" + user.UserName + ".png",
+            Status = "Online",
+            RecentlyPlayed = user.GameData.Values.OrderByDescending(g => g.LastPlay).Take(5).Select(g => new {
+                GameID = g.GameID.ToString(),
+                Title = StaticDataManager.FindGameDataById(g.GameID)?.Title ?? "Unknown",
+                ImageIcon = StaticDataManager.FindGameDataById(g.GameID)?.ImageIconURL ?? ""
+            }).ToArray(),
+            Awarded = user.GameData.ToDictionary(k => k.Key.ToString(), v => new {
+                NumPossibleAchievements = StaticDataManager.FindGameDataById(v.Key)?.GetAchievementCount() ?? 0,
+                PossibleScore = StaticDataManager.FindGameDataById(v.Key)?.GetAllAchievements().Sum(a => a.Points) ?? 0,
+                NumAchieved = v.Value.Achievements.Count(a => a.Value.Status == UserAchievementData.StatusFlag.SoftcoreUnlock),
+                ScoreAchieved = v.Value.Achievements.Where(a => a.Value.Status == UserAchievementData.StatusFlag.SoftcoreUnlock).Sum(a => StaticDataManager.FindGameDataById(v.Key)?.GetAchievementById(a.Key)?.Points ?? 0),
+                NumAchievedHardcore = v.Value.Achievements.Count(a => a.Value.Status == UserAchievementData.StatusFlag.HardcoreUnlock),
+                ScoreAchievedHardcore = v.Value.Achievements.Where(a => a.Value.Status == UserAchievementData.StatusFlag.HardcoreUnlock).Sum(a => StaticDataManager.FindGameDataById(v.Key)?.GetAchievementById(a.Key)?.Points ?? 0)
+            })
+        };
+        await ctx.Response.SendJson(response);
+    }
+
+    internal static async Task RAGameInfoAndUserProgress(HttpContextBase ctx) {
+        uint gameId = UInt32.Parse(ctx.Request.GetParameter("g"));
+        string username = ctx.Request.GetParameter("u");
+        
+        GameData game = StaticDataManager.FindGameDataById(gameId);
+        if (game == null) {
+            await ctx.Response.SendJson(new RAErrorResponse("Game not found"));
+            return;
+        }
+
+        UserData user = UserManager.GetUserData(username);
+        UserGameData userGameData = user?.GameData.GetValueOrDefault(gameId);
+
+        var response = new {
+            ID = game.ID,
+            Title = game.Title,
+            ConsoleID = game.ConsoleID,
+            ImageIcon = game.ImageIconURL,
+            Achievements = game.GetAllAchievements().Select(a => new {
+                ID = a.ID,
+                Title = a.Title,
+                Description = a.Description,
+                Points = a.Points,
+                BadgeName = a.BadgeName,
+                Author = a.Author,
+                DateCreated = a.Created.ToString(),
+                DateModified = a.Modified.ToString(),
+                DateEarned = userGameData?.Achievements.GetValueOrDefault(a.ID)?.Status == UserAchievementData.StatusFlag.SoftcoreUnlock ? userGameData.Achievements[a.ID].When.ToString() : null,
+                DateEarnedHardcore = userGameData?.Achievements.GetValueOrDefault(a.ID)?.Status == UserAchievementData.StatusFlag.HardcoreUnlock ? userGameData.Achievements[a.ID].When.ToString() : null
+            }).ToArray(),
+            NumAchievements = game.GetAchievementCount()
         };
         await ctx.Response.SendJson(response);
     }
