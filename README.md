@@ -1,0 +1,2 @@
+# myEmulationStation
+ignore, AI slop :(
